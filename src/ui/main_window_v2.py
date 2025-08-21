@@ -27,6 +27,8 @@ except ImportError as e:
 from .panels.document_panel import DocumentPanel
 from .panels.template_panel import TemplatePanel
 from .panels.status_panel import StatusPanel
+from .dialogs.header_footer_dialog import HeaderFooterDialog
+from ..core.header_footer_config import HeaderFooterConfig
 from ..utils.logger import app_logger
 from ..utils.config_manager import config_manager
 
@@ -57,6 +59,9 @@ class MainWindowV2(QMainWindow):
         self.document_panel: Optional[DocumentPanel] = None
         self.template_panel: Optional[TemplatePanel] = None
         self.status_panel: Optional[StatusPanel] = None
+        
+        # 页眉页脚配置
+        self.header_footer_config: Optional[HeaderFooterConfig] = None
         
         # 初始化UI
         self._init_ui()
@@ -300,6 +305,11 @@ class MainWindowV2(QMainWindow):
             app_logger.warning("文档或模板未选择")
             return
         
+        # 获取页眉页脚配置
+        header_footer_config = self.template_panel.get_header_footer_config()
+        if header_footer_config:
+            app_logger.info("检测到页眉页脚配置，将应用到文档")
+        
         # 更新状态面板
         if self.status_panel:
             self.status_panel.start_formatting()
@@ -307,8 +317,8 @@ class MainWindowV2(QMainWindow):
         # 发射信号
         self.formatting_started.emit()
         
-        # TODO: 启动排版工作线程
-        self._start_formatting_worker(doc_path, template_name)
+        # 启动排版工作线程
+        self._start_formatting_worker(doc_path, template_name, header_footer_config)
     
     def _on_stop_requested(self):
         """
@@ -334,13 +344,14 @@ class MainWindowV2(QMainWindow):
         if self.status_panel:
             self.status_panel.stop_formatting()
     
-    def _start_formatting_worker(self, doc_path: str, template_name: str):
+    def _start_formatting_worker(self, doc_path: str, template_name: str, header_footer_config=None):
         """
         启动排版工作线程
         
         Args:
             doc_path: 文档路径
             template_name: 模板名称
+            header_footer_config: 页眉页脚配置
         """
         try:
             # 导入必要的模块
@@ -382,7 +393,8 @@ class MainWindowV2(QMainWindow):
                 structure_analyzer,
                 doc_path,
                 template_name,
-                save_path
+                save_path,
+                header_footer_config
             )
             
             # 连接信号

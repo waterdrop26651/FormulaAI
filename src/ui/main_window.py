@@ -159,7 +159,7 @@ class FormattingWorker(QThread):
     log_message = pyqtSignal(str)  # 日志消息信号
     task_completed = pyqtSignal(bool, str)  # 任务完成信号，参数为是否成功和消息
     
-    def __init__(self, doc_processor, ai_connector, format_manager, structure_analyzer, doc_path, template_name, save_path=None):
+    def __init__(self, doc_processor, ai_connector, format_manager, structure_analyzer, doc_path, template_name, save_path=None, header_footer_config=None):
         super().__init__()
         self.doc_processor = doc_processor
         self.ai_connector = ai_connector
@@ -168,6 +168,7 @@ class FormattingWorker(QThread):
         self.doc_path = doc_path
         self.template_name = template_name
         self.save_path = save_path
+        self.header_footer_config = header_footer_config
         self.is_running = False
     
     def run(self):
@@ -242,16 +243,20 @@ class FormattingWorker(QThread):
             self.progress_updated.emit(85)
             self.log_message.emit("正在应用排版格式...")
             
+            # 应用排版格式（包括页眉页脚）
+            if self.header_footer_config:
+                self.log_message.emit("检测到页眉页脚配置，将一并应用")
+            
             # 使用自定义保存路径
             if self.save_path:
                 self.log_message.emit(f"将使用自定义保存路径: {self.save_path}")
-                if not self.doc_processor.apply_formatting(formatting_instructions, self.save_path):
+                if not self.doc_processor.apply_formatting(formatting_instructions, self.save_path, self.header_footer_config):
                     self.log_message.emit("应用排版格式失败！")
                     self.task_completed.emit(False, "应用排版格式失败")
                     return
             else:
                 self.log_message.emit("未指定保存路径，将保存到原文件目录")
-                if not self.doc_processor.apply_formatting(formatting_instructions):
+                if not self.doc_processor.apply_formatting(formatting_instructions, None, self.header_footer_config):
                     self.log_message.emit("应用排版格式失败！")
                     self.task_completed.emit(False, "应用排版格式失败")
                     return

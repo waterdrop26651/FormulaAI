@@ -13,6 +13,8 @@ from docx.oxml.ns import qn
 from ..utils.logger import app_logger
 from ..utils.file_utils import generate_output_filename, is_valid_docx, backup_file
 from ..utils.font_manager import FontManager
+from .header_footer_processor import HeaderFooterProcessor
+from .header_footer_config import HeaderFooterConfig
 
 class DocProcessor:
     """文档处理器，负责读取、解析和写入Word文档"""
@@ -26,6 +28,9 @@ class DocProcessor:
         
         # 使用字体管理器获取字体信息
         self.font_manager = FontManager()
+        
+        # 初始化页眉页脚处理器
+        self.header_footer_processor = HeaderFooterProcessor()
         
         # 字号映射
         self.font_size_mapping = {
@@ -80,13 +85,14 @@ class DocProcessor:
         
         return self.paragraphs_text
     
-    def apply_formatting(self, formatting_instructions, custom_save_path=None):
+    def apply_formatting(self, formatting_instructions, custom_save_path=None, header_footer_config=None):
         """
         根据排版指令应用格式
         
         Args:
             formatting_instructions: 排版指令，包含元素类型和格式信息
             custom_save_path: 自定义保存路径，如果指定则使用该路径
+            header_footer_config: 页眉页脚配置，HeaderFooterConfig对象
             
         Returns:
             是否成功应用格式
@@ -163,6 +169,19 @@ class DocProcessor:
                 else:
                     self.output_file = self.input_file.replace('.docx', '_已排版.docx')
                 app_logger.debug(f"使用默认输出文件名: {self.output_file}")
+            
+            # 应用页眉页脚（在保存之前）
+            if header_footer_config:
+                try:
+                    app_logger.info("开始应用页眉页脚设置")
+                    success = self.header_footer_processor.apply_header_footer(new_doc, header_footer_config)
+                    if success:
+                        app_logger.info("页眉页脚应用成功")
+                    else:
+                        app_logger.warning("页眉页脚应用失败，但继续保存文档")
+                except Exception as e:
+                    app_logger.error(f"应用页眉页脚时发生错误: {str(e)}")
+                    # 不中断文档保存过程
             
             # 保存文档
             try:

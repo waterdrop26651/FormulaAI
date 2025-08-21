@@ -33,6 +33,8 @@ from ...utils.logger import app_logger
 from ...utils.config_manager import config_manager
 from ...core.format_manager import FormatManager
 from ..api_config_dialog import ApiConfigDialog
+from ..dialogs.header_footer_dialog import HeaderFooterDialog
+from ...core.header_footer_config import HeaderFooterConfig
 
 
 class TemplatePanel(QWidget):
@@ -56,6 +58,9 @@ class TemplatePanel(QWidget):
         # 核心组件
         self.format_manager = FormatManager()
         self.app_config = config_manager.get_app_config()
+        
+        # 页眉页脚配置
+        self.header_footer_config: Optional[HeaderFooterConfig] = None
         
         # 初始化UI
         self._init_ui()
@@ -142,7 +147,7 @@ class TemplatePanel(QWidget):
         return group
     
     def _create_template_management_group(self) -> QGroupBox:
-        """创建模板管理组（仅保留导入功能）"""
+        """创建模板管理组"""
         group = QGroupBox("模板管理")
         layout = QVBoxLayout(group)
         
@@ -150,7 +155,13 @@ class TemplatePanel(QWidget):
         self.import_btn = QPushButton("导入模板")
         self.import_btn.clicked.connect(self._import_template)
         
+        # 页眉页脚配置按钮
+        self.header_footer_btn = QPushButton("页眉页脚设置")
+        self.header_footer_btn.clicked.connect(self._show_header_footer_dialog)
+        self.header_footer_btn.setToolTip("配置文档的页眉页脚")
+        
         layout.addWidget(self.import_btn)
+        layout.addWidget(self.header_footer_btn)
         
         return group
     
@@ -367,10 +378,27 @@ class TemplatePanel(QWidget):
             app_logger.error(f"打开API配置失败: {e}")
             QMessageBox.warning(self, "错误", f"打开API配置失败: {str(e)}")
     
+    def _show_header_footer_dialog(self):
+        """显示页眉页脚配置对话框"""
+        try:
+            dialog = HeaderFooterDialog(self, self.header_footer_config)
+            if dialog.exec():
+                self.header_footer_config = dialog.config
+                app_logger.info("页眉页脚配置已更新")
+                QMessageBox.information(self, "成功", "页眉页脚配置已保存")
+                
+        except Exception as e:
+            app_logger.error(f"打开页眉页脚配置失败: {e}")
+            QMessageBox.warning(self, "错误", f"打开页眉页脚配置失败: {str(e)}")
+    
     # 公共接口方法
     def get_selected_template(self) -> Optional[str]:
         """获取选择的模板名称"""
         return self._current_template
+    
+    def get_header_footer_config(self) -> Optional[HeaderFooterConfig]:
+        """获取页眉页脚配置"""
+        return self.header_footer_config
     
     def on_document_ready(self, file_path: str):
         """文档准备就绪事件"""
