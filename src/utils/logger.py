@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
-日志工具模块
-负责记录应用程序的日志信息，并提供日志显示和管理功能。
+LogTool模块
+负责RecordApplicationProgram的LogInformation，并提供LogVisible和管理Function。
 """
 
 import logging
@@ -11,15 +11,15 @@ from datetime import datetime
 from logging.handlers import RotatingFileHandler
 
 class Logger:
-    """日志管理器类。管理日志的创建、格式化和输出。"""
+    """Log管理器Class。管理Log的创建、Format和输出。"""
     
     def __init__(self, name="AIPoliDoc", log_dir="logs"):
         """
-        初始化日志管理器。
+        初始化Log管理器。
         
         Args:
-            name: 日志器名称
-            log_dir: 日志文件存放目录
+            name: Log器名称
+            log_dir: LogFile存放Directory
         """
         self.logger = logging.getLogger(name)
         self.logger.setLevel(logging.DEBUG)
@@ -27,18 +27,18 @@ class Logger:
         self.log_file = None
         self.ui_handlers = []
         
-        # 创建日志目录
+        # CreateLogDirectory
         if not os.path.exists(log_dir):
             os.makedirs(log_dir)
             
-        # 创建日志文件
+        # CreateLogFile
         self._setup_file_handler()
         
-        # 创建控制台处理器
+        # Create控System台Process器
         self._setup_console_handler()
     
     def _setup_file_handler(self):
-        """设置文件日志处理器"""
+        """SettingsFileLogProcess器"""
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         self.log_file = os.path.join(self.log_dir, f"aipolidoc_{timestamp}.log")
         
@@ -58,9 +58,9 @@ class Logger:
         self.logger.addHandler(file_handler)
     
     def _setup_console_handler(self):
-        """设置控制台日志处理器"""
+        """Settings控System台LogProcess器"""
         console_handler = logging.StreamHandler()
-        console_handler.setLevel(logging.DEBUG)  # 修改为调试级别，以显示更多日志
+        console_handler.setLevel(logging.DEBUG)  # Modified to debug level to show more logs
         
         formatter = logging.Formatter(
             '%(asctime)s - %(levelname)s - %(message)s'
@@ -71,10 +71,10 @@ class Logger:
     
     def add_ui_handler(self, callback):
         """
-        添加UI日志处理器，用于将日志信息发送到UI显示。
+        AddUILogProcess器，用于将LogInformation发送到UIVisible。
         
         Args:
-            callback: 接收日志信息的回调函数
+            callback: 接收LogInformation的回调Function
         """
         class UIHandler(logging.Handler):
             def __init__(self, callback):
@@ -86,7 +86,7 @@ class Logger:
                 self.callback(log_entry, record.levelname)
         
         handler = UIHandler(callback)
-        handler.setLevel(logging.DEBUG)  # 修改为调试级别，以显示更多日志
+        handler.setLevel(logging.DEBUG)  # Modified to debug level to show more logs
         formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
         handler.setFormatter(formatter)
         
@@ -94,7 +94,7 @@ class Logger:
         self.ui_handlers.append(handler)
     
     def remove_ui_handler(self, callback):
-        """移除UI日志处理器"""
+        """RemoveUILogProcess器"""
         for handler in self.ui_handlers:
             if handler.callback == callback:
                 self.logger.removeHandler(handler)
@@ -102,24 +102,24 @@ class Logger:
                 break
     
     def debug(self, message):
-        """记录调试级别日志"""
+        """RecordDebugLevel别Log"""
         self.logger.debug(message)
     
     def info(self, message):
-        """记录信息级别日志"""
+        """RecordInformationLevel别Log"""
         self.logger.info(message)
     
     def warning(self, message):
-        """记录警告级别日志"""
+        """RecordWarningLevel别Log"""
         self.logger.warning(message)
     
     def error(self, message):
-        """记录错误级别日志"""
+        """RecordErrorLevel别Log"""
         self.logger.error(message)
     
     def critical(self, message):
-        """记录严重错误级别日志"""
+        """Record严重ErrorLevel别Log"""
         self.logger.critical(message)
 
-# 创建全局日志实例
+# Create全局LogInstance
 app_logger = Logger()

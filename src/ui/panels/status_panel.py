@@ -1,17 +1,17 @@
 # -*- coding: utf-8 -*-
 """
-状态面板
+StatusPanel
 
 职责：
-1. 显示处理进度
-2. 显示日志信息
-3. 提供停止控制
-4. 显示状态信息
+1. VisibleProcessProgress
+2. VisibleLogInformation
+3. 提供Stop控System
+4. VisibleStatusInformation
 
-设计原则：
-- 信息清晰：进度和日志分离显示
-- 操作简单：一键停止
-- 状态明确：当前操作状态一目了然
+设计原Rule：
+- InformationClear：Progress和LogMinute离Visible
+- OperationSimple：One键Stop
+- Status明确：WhenPreviousOperationStatusOne目了然
 """
 
 from typing import Optional
@@ -32,72 +32,72 @@ from ...utils.logger import app_logger
 
 class StatusPanel(QWidget):
     """
-    状态面板
+    StatusPanel
     
-    信号：
-    - stop_requested: 请求停止处理
+    Signal：
+    - stop_requested: RequestStopProcess
     """
     
-    # 信号定义
-    stop_requested = pyqtSignal()  # 停止请求
+    # Signal definitions
+    stop_requested = pyqtSignal()  # Stop request
     
     def __init__(self, parent=None):
         super().__init__(parent)
         
-        # 状态变量
+        # State variables
         self._is_processing: bool = False
         self._current_progress: int = 0
         
-        # 初始化UI
+        # Initialize UI
         self._init_ui()
         
-        # 设置日志处理器
+        # SetLogProcess器
         app_logger.add_ui_handler(self._update_log)
         
-        app_logger.info("状态面板初始化完成")
+        app_logger.info("StatusPanel初始化Complete")
     
     def _init_ui(self):
         """
-        初始化用户界面
+        初始化User界面
         
-        布局：
-        ┌─进度显示─────────────────────────────┐
-        │ 进度条 [████████░░] 80% [停止]    │
-        ├─日志显示─────────────────────────────┤
-        │ 处理日志信息...                    │
-        │ 文档分析完成                       │
-        │ 开始应用模板...                    │
+        Layout：
+        ┌─ProgressVisible─────────────────────────────┐
+        │ ProgressItem [████████░░] 80% [Stop]    │
+        ├─LogVisible─────────────────────────────┤
+        │ ProcessLogInformation...                    │
+        │ DocumentAnalyzeComplete                       │
+        │ StartApplicationTemplate...                    │
         └───────────────────────────────────┘
         """
         layout = QVBoxLayout(self)
         layout.setContentsMargins(10, 5, 10, 10)
         layout.setSpacing(5)
         
-        # 进度显示区
+        # Progress display area
         progress_group = self._create_progress_group()
         layout.addWidget(progress_group)
         
-        # 日志显示区
+        # Log display area
         log_group = self._create_log_group()
         layout.addWidget(log_group)
     
     def _create_progress_group(self) -> QGroupBox:
-        """创建进度显示组"""
-        group = QGroupBox("处理进度")
+        """创建ProgressVisible组"""
+        group = QGroupBox("ProcessProgress")
         layout = QHBoxLayout(group)
         
-        # 状态标签
+        # Status label
         self.status_label = QLabel("就绪")
         self.status_label.setMinimumWidth(80)
         
-        # 进度条
+        # Progress bar
         self.progress_bar = QProgressBar()
         self.progress_bar.setRange(0, 100)
         self.progress_bar.setValue(0)
         self.progress_bar.setTextVisible(True)
         
-        # 停止按钮
-        self.stop_btn = QPushButton("停止")
+        # Stop button
+        self.stop_btn = QPushButton("Stop")
         self.stop_btn.setEnabled(False)
         self.stop_btn.setMinimumWidth(80)
         self.stop_btn.setStyleSheet("""
@@ -117,21 +117,21 @@ class StatusPanel(QWidget):
             }
         """)
         
-        # 连接信号
+        # Connect signals
         self.stop_btn.clicked.connect(self._request_stop)
         
         layout.addWidget(self.status_label)
-        layout.addWidget(self.progress_bar, 1)  # 拉伸因子为1
+        layout.addWidget(self.progress_bar, 1)  # Stretch factor 1
         layout.addWidget(self.stop_btn)
         
         return group
     
     def _create_log_group(self) -> QGroupBox:
-        """创建日志显示组"""
-        group = QGroupBox("处理日志")
+        """创建LogVisible组"""
+        group = QGroupBox("ProcessLog")
         layout = QVBoxLayout(group)
         
-        # 日志文本框
+        # Log text box
         self.log_text = QTextEdit()
         self.log_text.setReadOnly(True)
         self.log_text.setMaximumHeight(120)
@@ -151,102 +151,102 @@ class StatusPanel(QWidget):
     
     def _update_log(self, message: str, level: str = "INFO"):
         """
-        更新日志显示
+        更NewLogVisible
         
         Args:
-            message: 日志消息
-            level: 日志级别
+            message: LogMessage
+            level: LogLevel别
         """
         if self.log_text:
-            # 添加时间戳
+            # Add timestamp
             from datetime import datetime
             timestamp = datetime.now().strftime("%H:%M:%S")
             formatted_message = f"[{timestamp}] {message}"
             
-            # 添加到日志
+            # Add to log
             self.log_text.append(formatted_message)
             
-            # 自动滚动到底部
+            # Auto scroll to bottom
             scrollbar = self.log_text.verticalScrollBar()
             scrollbar.setValue(scrollbar.maximum())
     
     def _request_stop(self):
-        """请求停止处理"""
+        """RequestStopProcess"""
         if self._is_processing:
             self.stop_requested.emit()
-            app_logger.info("用户请求停止处理")
+            app_logger.info("UserRequestStopProcess")
     
-    # 公共接口方法
+    # Public interface methods
     def start_formatting(self):
-        """开始排版处理"""
+        """StartFormattingProcess"""
         self._is_processing = True
-        self.status_label.setText("处理中...")
+        self.status_label.setText("ProcessCenter...")
         self.progress_bar.setValue(0)
         self.stop_btn.setEnabled(True)
         
-        # 清空日志
+        # Clear log
         self.log_text.clear()
         
-        app_logger.info("开始排版处理")
+        app_logger.info("StartFormattingProcess")
     
     def stop_formatting(self):
-        """停止排版处理"""
+        """StopFormattingProcess"""
         self._is_processing = False
-        self.status_label.setText("已停止")
+        self.status_label.setText("已Stop")
         self.stop_btn.setEnabled(False)
         
-        app_logger.info("排版处理已停止")
+        app_logger.info("FormattingProcess已Stop")
     
     def complete_formatting(self, success: bool = True):
-        """完成排版处理"""
+        """CompleteFormattingProcess"""
         self._is_processing = False
         self.stop_btn.setEnabled(False)
         
         if success:
-            self.status_label.setText("完成")
+            self.status_label.setText("Complete")
             self.progress_bar.setValue(100)
-            app_logger.info("排版处理完成")
+            app_logger.info("FormattingProcessComplete")
         else:
-            self.status_label.setText("失败")
-            app_logger.error("排版处理失败")
+            self.status_label.setText("Failed")
+            app_logger.error("FormattingProcessFailed")
     
     def update_progress(self, value: int, message: str = ""):
         """
-        更新进度
+        更NewProgress
         
         Args:
-            value: 进度值 (0-100)
-            message: 进度消息
+            value: ProgressValue (0-100)
+            message: ProgressMessage
         """
         self._current_progress = value
         self.progress_bar.setValue(value)
         
         if message:
             self.status_label.setText(message)
-            app_logger.info(f"进度更新: {value}% - {message}")
+            app_logger.info(f"Progress更New: {value}% - {message}")
     
     def is_processing(self) -> bool:
-        """是否正在处理"""
+        """YesNo正InProcess"""
         return self._is_processing
     
     def get_current_progress(self) -> int:
-        """获取当前进度"""
+        """获取WhenPreviousProgress"""
         return self._current_progress
     
     def clear_log(self):
-        """清空日志"""
+        """清SpaceLog"""
         if self.log_text:
             self.log_text.clear()
     
     def add_log_message(self, message: str, level: str = "INFO"):
         """
-        添加日志消息
+        AddLogMessage
         
         Args:
-            message: 消息内容
-            level: 日志级别 (INFO, WARNING, ERROR)
+            message: MessageContent
+            level: LogLevel别 (INFO, WARNING, ERROR)
         """
-        # 根据级别设置颜色
+        # Set color based on level
         color_map = {
             "INFO": "black",
             "WARNING": "orange",
@@ -255,7 +255,7 @@ class StatusPanel(QWidget):
         
         color = color_map.get(level, "black")
         
-        # 添加带颜色的消息
+        # Add colored message
         from datetime import datetime
         timestamp = datetime.now().strftime("%H:%M:%S")
         
@@ -264,6 +264,6 @@ class StatusPanel(QWidget):
                 f'<span style="color: {color}">[{timestamp}] [{level}] {message}</span>'
             )
             
-            # 自动滚动到底部
+            # Auto scroll to bottom
             scrollbar = self.log_text.verticalScrollBar()
             scrollbar.setValue(scrollbar.maximum())

@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 """
-主窗口模块 V2 - 重构版
-采用Linus "好品味"原则：消除特殊情况，简化数据结构
+主Window模块 V2 - 重构Edition
+采用Linus "好品味"原Rule：消除Special情况，简化Data结构
 
-核心理念：
-1. 每个组件只做一件事并做好
-2. 消除超过3层缩进的复杂逻辑
-3. 用最简单的方式解决问题
+Core理念：
+1. Each组Item只做OneItem事并做好
+2. 消除超过3Layer缩进的Complex逻辑
+3. 用最Simple的方式解决问题
 """
 
 import os
@@ -33,90 +33,90 @@ from ..utils.config_manager import config_manager
 
 class MainWindowV2(QMainWindow):
     """
-    主窗口 V2 - 重构版
+    主Window V2 - 重构Edition
     
-    架构原则：
-    - 双面板布局：文档管理 + 模板设置
-    - 状态管理器：单一数据源
-    - 事件驱动：面板间通过信号通信
-    - 模块化：每个面板完全独立
+    架构原Rule：
+    - 双PanelLayout：Document管理 + TemplateSettings
+    - Status管理器：单OneData源
+    - Event驱动：PanelBetweenThroughSignal通信
+    - 模块化：EachPanelCompletelyIndependent
     """
     
-    # 信号定义
-    document_selected = pyqtSignal(str)  # 文档选择信号
-    template_changed = pyqtSignal(str)   # 模板变更信号
-    formatting_started = pyqtSignal()    # 开始排版信号
+    # Signal definitions
+    document_selected = pyqtSignal(str)  # Document selection signal
+    template_changed = pyqtSignal(str)   # Template change signal
+    formatting_started = pyqtSignal()    # Start formatting signal
     
     def __init__(self):
         super().__init__()
         
-        # 应用配置
+        # Application configuration
         self.app_config = config_manager.get_app_config()
         
-        # 初始化面板
+        # Initialize panels
         self.document_panel: Optional[DocumentPanel] = None
         self.template_panel: Optional[TemplatePanel] = None
         self.status_panel: Optional[StatusPanel] = None
         
-        # 初始化UI
+        # Initialize UI
         self._init_ui()
         self._connect_signals()
         self._apply_styles()
         
-        # 设置窗口属性
-        self.setWindowTitle("FormulaAI - AI智能文档排版工具")
+        # Set window properties
+        self.setWindowTitle("FormulaAI - AI-Powered Document Formatting Tool")
         self.resize(1000, 700)
         
-        app_logger.info("主窗口V2初始化完成")
+        app_logger.info("主WindowV2初始化Complete")
     
     def _init_ui(self):
         """
-        初始化用户界面
+        初始化User界面
         
-        布局结构：
+        Layout结构：
         ┌─────────────────────────────────────┐
-        │  [文档面板]  │  [模板面板]        │
+        │  [DocumentPanel]  │  [TemplatePanel]        │
         │             │                   │
         │             │                   │
         ├─────────────────────────────────────┤
-        │           [状态面板]              │
+        │           [StatusPanel]              │
         └─────────────────────────────────────┘
         """
-        # 创建中央窗口部件
+        # Create central widget
         central_widget = QWidget()
         self.setCentralWidget(central_widget)
         
-        # 主布局
+        # Main layout
         main_layout = QVBoxLayout(central_widget)
         main_layout.setContentsMargins(10, 10, 10, 10)
         main_layout.setSpacing(10)
         
-        # 创建水平分割器（文档面板 | 模板面板）
+        # Create horizontal splitter (document panel | template panel)
         splitter = QSplitter(Qt.Orientation.Horizontal)
         
-        # 创建面板
+        # Create panels
         self.document_panel = DocumentPanel()
         self.template_panel = TemplatePanel()
         self.status_panel = StatusPanel()
         
-        # 添加面板到分割器
+        # Add panels to splitter
         splitter.addWidget(self.document_panel)
         splitter.addWidget(self.template_panel)
         
-        # 设置分割器比例（文档面板:模板面板 = 1:1）
+        # Set splitter ratio (document panel:template panel = 1:1)
         splitter.setSizes([500, 500])
         
-        # 添加到主布局
-        main_layout.addWidget(splitter, 1)  # 拉伸因子为1
-        main_layout.addWidget(self.status_panel)  # 固定高度
+        # Add to main layout
+        main_layout.addWidget(splitter, 1)  # Stretch factor 1
+        main_layout.addWidget(self.status_panel)  # Fixed height
     
     def _connect_signals(self):
         """
-        连接信号和槽
+        JoinSignal和槽
         
-        事件流：
-        文档面板 → 主窗口 → 模板面板
-        模板面板 → 主窗口 → 文档面板
+        Event流：
+        DocumentPanel → 主Window → TemplatePanel
+        TemplatePanel → 主Window → DocumentPanel
         """
         if self.document_panel:
             self.document_panel.document_selected.connect(self._on_document_selected)
@@ -130,29 +130,29 @@ class MainWindowV2(QMainWindow):
     
     def _apply_styles(self):
         """
-        应用样式
+        ApplicationStyle
         
-        设计原则：
+        设计原Rule：
         - 简洁现代
-        - 层次清晰
-        - 专业工具感
-        - 强制浅色主题，不受系统暗色模式影响
+        - Layer次Clear
+        - 专业Tool感
+        - StrongSystemShallow色主题，不受SystemDark色模式影响
         """
-        # 设置全局字体 (跳过字体设置以避免兼容性问题)
+        # Set全局Font (Skip font settings to avoid compatibility issues)
         # app = QApplication.instance()
         # if app and hasattr(app, 'setFont'):
         #     font = QFont("Microsoft YaHei", 10)
         #     app.setFont(font)
         
-        # 强制浅色主题样式，覆盖系统暗色模式
+        # Force light theme style, override system dark mode
         self.setStyleSheet("""
-            /* 主窗口强制浅色背景 */
+            /* 主WindowStrongSystemShallow色背景 */
             QMainWindow {
                 background-color: #ffffff;
                 color: #333333;
             }
             
-            /* 分割器样式 */
+            /* Minute割器Style */
             QSplitter::handle {
                 background-color: #d0d0d0;
                 width: 2px;
@@ -161,13 +161,13 @@ class MainWindowV2(QMainWindow):
                 background-color: #2196F3;
             }
             
-            /* 强制所有QWidget使用浅色主题 */
+            /* StrongSystem所HasQWidgetUseShallow色主题 */
             QWidget {
                 background-color: #ffffff;
                 color: #333333;
             }
             
-            /* 分组框样式 */
+            /* Group框Style */
             QGroupBox {
                 background-color: #ffffff;
                 color: #333333;
@@ -183,7 +183,7 @@ class MainWindowV2(QMainWindow):
                 color: #1976D2;
             }
             
-            /* 文本框样式 */
+            /* Text boxStyle */
             QTextEdit, QLineEdit {
                 background-color: #ffffff;
                 color: #333333;
@@ -192,7 +192,7 @@ class MainWindowV2(QMainWindow):
                 padding: 5px;
             }
             
-            /* 下拉框样式 */
+            /* DropdownStyle */
             QComboBox {
                 background-color: #ffffff;
                 color: #333333;
@@ -210,7 +210,7 @@ class MainWindowV2(QMainWindow):
                 border-top: 5px solid #666666;
             }
             
-            /* 按钮样式 */
+            /* ButtonsStyle */
             QPushButton {
                 background-color: #2196F3;
                 color: white;
@@ -230,13 +230,13 @@ class MainWindowV2(QMainWindow):
                 color: #E1F5FE;
             }
             
-            /* 标签样式 */
+            /* LabelsStyle */
             QLabel {
                 background-color: transparent;
                 color: #333333;
             }
             
-            /* 进度条样式 */
+            /* ProgressItemStyle */
             QProgressBar {
                 background-color: #f0f0f0;
                 color: #333333;
@@ -250,46 +250,46 @@ class MainWindowV2(QMainWindow):
             }
         """)
     
-    # 事件处理方法
+    # Event handling methods
     def _on_document_selected(self, file_path: str):
         """
-        处理文档选择事件
+        ProcessDocumentSelectionEvent
         
         Args:
-            file_path: 选择的文档路径
+            file_path: Selection的Document path
         """
-        app_logger.info(f"文档已选择: {file_path}")
+        app_logger.info(f"Document已Selection: {file_path}")
         
-        # 通知模板面板文档已选择
+        # 通知TemplatePanelDocument已Selection
         if self.template_panel:
             self.template_panel.on_document_ready(file_path)
         
-        # 发射信号
+        # Emit signal
         self.document_selected.emit(file_path)
     
     def _on_template_changed(self, template_name: str):
         """
-        处理模板变更事件
+        ProcessTemplate变更Event
         
         Args:
-            template_name: 模板名称
+            template_name: Template name
         """
-        app_logger.info(f"模板已变更: {template_name}")
+        app_logger.info(f"Template已变更: {template_name}")
         
-        # 保存最后使用的模板
+        # Save最NextUse的Template
         self.app_config["last_template"] = template_name
         config_manager.save_app_config(self.app_config)
         
-        # 发射信号
+        # Emit signal
         self.template_changed.emit(template_name)
     
     def _on_formatting_requested(self):
         """
-        处理排版请求事件
+        ProcessFormattingRequestEvent
         """
-        app_logger.info("开始排版处理")
+        app_logger.info("StartFormattingProcess")
         
-        # 获取当前文档和模板
+        # GetWhenPreviousDocument和Template
         if not self.document_panel or not self.template_panel:
             return
         
@@ -297,83 +297,83 @@ class MainWindowV2(QMainWindow):
         template_name = self.template_panel.get_selected_template()
         
         if not doc_path or not template_name:
-            app_logger.warning("文档或模板未选择")
+            app_logger.warning("Document或Template未Selection")
             return
         
-        # 更新状态面板
+        # Update status panel
         if self.status_panel:
             self.status_panel.start_formatting()
         
-        # 发射信号
+        # Emit signal
         self.formatting_started.emit()
         
-        # TODO: 启动排版工作线程
+        # TODO: StartupFormatting工作线程
         self._start_formatting_worker(doc_path, template_name)
     
     def _on_stop_requested(self):
         """
-        处理停止请求事件
+        ProcessStopRequestEvent
         
-        停止当前的排版处理
+        StopWhenPrevious的FormattingProcess
         """
-        app_logger.info("用户请求停止处理")
+        app_logger.info("UserRequestStopProcess")
         
-        # 停止排版工作线程
+        # StopFormatting工作线程
         if hasattr(self, 'formatting_worker') and self.formatting_worker:
             try:
                 self.formatting_worker.stop()
-                self.formatting_worker.wait(3000)  # 等待最多3秒
+                self.formatting_worker.wait(3000)  # Wait up to 3 seconds
                 if self.formatting_worker.isRunning():
                     self.formatting_worker.terminate()
                 self.formatting_worker = None
-                app_logger.info("排版工作线程已停止")
+                app_logger.info("Formatting工作线程已Stop")
             except Exception as e:
-                app_logger.error(f"停止排版工作线程失败: {e}")
+                app_logger.error(f"StopFormatting工作线程Failed: {e}")
         
-        # 更新状态面板
+        # Update status panel
         if self.status_panel:
             self.status_panel.stop_formatting()
     
     def _start_formatting_worker(self, doc_path: str, template_name: str):
         """
-        启动排版工作线程
+        StartupFormatting工作线程
         
         Args:
-            doc_path: 文档路径
-            template_name: 模板名称
+            doc_path: Document path
+            template_name: Template name
         """
         try:
-            # 导入必要的模块
+            # Import necessary modules
             from ..core.doc_processor import DocProcessor
             from ..core.ai_connector import AIConnector
             from ..core.format_manager import FormatManager
             from ..core.structure_analyzer import StructureAnalyzer
             from ..utils.config_manager import config_manager
             
-            # 创建核心组件实例
+            # CreateCore组ItemInstance
             doc_processor = DocProcessor()
             api_config = config_manager.get_api_config()
             ai_connector = AIConnector(api_config)
             format_manager = FormatManager()
             structure_analyzer = StructureAnalyzer()
             
-            # 验证API配置
+            # ValidateAPIConfiguration
             valid, error_msg = ai_connector.validate_config()
             if not valid:
                 if self.status_panel:
-                    self.status_panel._update_log(f"API配置错误: {error_msg}", "ERROR")
+                    self.status_panel._update_log(f"APIConfigurationError: {error_msg}", "ERROR")
                 return
             
-            # 获取保存路径
+            # Get保存Path
             save_path = None
             if self.document_panel:
                 save_path = self.document_panel.get_save_directory()
                 if save_path:
-                    app_logger.info(f"使用自定义保存路径: {save_path}")
+                    app_logger.info(f"UseCustom保存Path: {save_path}")
                 else:
-                    app_logger.info("未设置保存路径，将保存到原文件目录")
+                    app_logger.info("未Settings保存Path，将保存到原FileDirectory")
             
-            # 创建并启动工作线程
+            # Create并Startup工作线程
             from .main_window import FormattingWorker
             self.formatting_worker = FormattingWorker(
                 doc_processor,
@@ -385,7 +385,7 @@ class MainWindowV2(QMainWindow):
                 save_path
             )
             
-            # 连接信号
+            # Connect signals
             self.formatting_worker.progress_updated.connect(
                 lambda progress: self.status_panel.update_progress(progress) if self.status_panel else None
             )
@@ -394,52 +394,52 @@ class MainWindowV2(QMainWindow):
             )
             self.formatting_worker.task_completed.connect(self._on_formatting_completed)
             
-            # 启动线程
+            # Start thread
             self.formatting_worker.start()
-            app_logger.info(f"启动排版: {doc_path} -> {template_name}")
+            app_logger.info(f"StartupFormatting: {doc_path} -> {template_name}")
             
         except Exception as e:
-            app_logger.error(f"启动排版工作线程失败: {e}")
+            app_logger.error(f"StartupFormatting工作线程Failed: {e}")
             if self.status_panel:
-                self.status_panel.update_log(f"启动排版失败: {str(e)}", "ERROR")
+                self.status_panel.update_log(f"StartupFormattingFailed: {str(e)}", "ERROR")
     
     def _on_formatting_completed(self, success: bool, result: str):
         """
-        排版完成回调
+        FormattingComplete回调
         
         Args:
-            success: 是否成功
-            result: 结果信息（成功时为输出文件路径，失败时为错误信息）
+            success: YesNoSuccess
+            result: ResultInformation（SuccessTime为输出File path，FailedTime为ErrorInformation）
         """
         if success:
             if self.status_panel:
-                self.status_panel._update_log(f"排版完成！文件已保存: {result}", "INFO")
-            app_logger.info(f"排版完成: {result}")
+                self.status_panel._update_log(f"FormattingComplete！File已保存: {result}", "INFO")
+            app_logger.info(f"FormattingComplete: {result}")
         else:
             if self.status_panel:
-                self.status_panel._update_log(f"排版失败: {result}", "ERROR")
-            app_logger.error(f"排版失败: {result}")
+                self.status_panel._update_log(f"FormattingFailed: {result}", "ERROR")
+            app_logger.error(f"FormattingFailed: {result}")
         
-        # 清理工作线程
+        # Clean up worker thread
         if hasattr(self, 'formatting_worker'):
             self.formatting_worker = None
     
-    # 公共接口方法
+    # Public interface methods
     def get_document_panel(self) -> Optional[DocumentPanel]:
-        """获取文档面板"""
+        """获取DocumentPanel"""
         return self.document_panel
     
     def get_template_panel(self) -> Optional[TemplatePanel]:
-        """获取模板面板"""
+        """获取TemplatePanel"""
         return self.template_panel
     
     def get_status_panel(self) -> Optional[StatusPanel]:
-        """获取状态面板"""
+        """获取StatusPanel"""
         return self.status_panel
     
     def closeEvent(self, event):
         """
-        窗口关闭事件
+        WindowShutdownEvent
         """
-        app_logger.info("主窗口关闭")
+        app_logger.info("主WindowShutdown")
         event.accept()

@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 """
-UI面板模块
+UIPanel模块
 
-包含所有UI面板组件：
-- DocumentPanel: 文档管理面板
-- TemplatePanel: 模板设置面板  
-- StatusPanel: 状态显示面板
+Contains所HasUIPanel组Item：
+- DocumentPanel: Document管理Panel
+- TemplatePanel: TemplateSettingsPanel  
+- StatusPanel: StatusVisiblePanel
 """
 
 from .document_panel import DocumentPanel

@@ -51,15 +51,15 @@ class DocumentPanel(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
         
-        # 状态变量
+        # State variables
         self._selected_document: Optional[str] = None
         self._save_directory: Optional[str] = None
         
-        # 核心组件
+        # Core components
         self.structure_analyzer = StructureAnalyzer()
         self.app_config = config_manager.get_app_config()
         
-        # 初始化UI
+        # Initialize UI
         self._init_ui()
         self._load_config()
         
@@ -81,19 +81,19 @@ class DocumentPanel(QWidget):
         layout.setContentsMargins(10, 10, 10, 10)
         layout.setSpacing(10)
         
-        # 文档选择区
+        # Document selection area
         doc_group = self._create_document_selection_group()
         layout.addWidget(doc_group)
         
-        # 保存设置区
+        # SaveSettings区
         save_group = self._create_save_settings_group()
         layout.addWidget(save_group)
         
-        # 操作按钮区
+        # Action buttons area
         action_group = self._create_action_buttons_group()
         layout.addWidget(action_group)
         
-        # 添加弹性空间
+        # Add flexible space
         layout.addStretch()
     
     def _create_document_selection_group(self) -> QGroupBox:
@@ -109,10 +109,10 @@ class DocumentPanel(QWidget):
         # Buttons
         self.browse_btn = QPushButton("Browse...")
         
-        # 连接信号
+        # Connect signals
         self.browse_btn.clicked.connect(self._select_document)
         
-        # 布局
+        # Layout
         layout.addWidget(self.doc_path_label, 0, 0)
         layout.addWidget(self.doc_path_value, 0, 1)
         layout.addWidget(self.browse_btn, 0, 2)
@@ -132,7 +132,7 @@ class DocumentPanel(QWidget):
         self.save_path_value.setStyleSheet("color: gray; padding: 5px; border: 1px solid #ddd; border-radius: 3px;")
         self.save_browse_btn = QPushButton("Browse...")
         
-        # 连接信号
+        # Connect signals
         self.save_browse_btn.clicked.connect(self._select_save_directory)
         
         layout.addWidget(self.save_path_label, 0, 0)
@@ -168,7 +168,7 @@ class DocumentPanel(QWidget):
             }
         """)
         
-        # 连接信号
+        # Connect signals
         self.format_btn.clicked.connect(self._request_formatting)
         
         layout.addStretch()
@@ -178,8 +178,8 @@ class DocumentPanel(QWidget):
         return group
     
     def _load_config(self):
-        """加载配置"""
-        # 加载保存路径配置
+        """加载Configuration"""
+        # Load保存PathConfiguration
         save_path = self.app_config.get("save_path", "")
         if save_path and os.path.exists(save_path):
             self._save_directory = save_path

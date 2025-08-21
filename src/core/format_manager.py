@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
-排版规则管理模块
-负责管理和应用排版规则，包括加载预设模板、保存自定义模板等。
+FormattingRule管理模块
+负责管理和ApplicationFormattingRule，包括加载预设Template、保存CustomTemplate等。
 """
 
 import os
@@ -11,56 +11,56 @@ from docx.shared import Pt
 from ..utils.logger import app_logger
 
 class FormatManager:
-    """排版规则管理器，负责管理和应用排版规则"""
+    """FormattingRule管理器，负责管理和ApplicationFormattingRule"""
     
     def __init__(self, templates_dir="config/templates"):
         """
-        初始化排版规则管理器
+        初始化FormattingRule管理器
         
         Args:
-            templates_dir: 模板目录路径
+            templates_dir: TemplateDirectoryPath
         """
         self.templates_dir = templates_dir
         self.templates = {}
         self.current_template = None
         self.current_template_name = ""
         
-        # 字体大小映射表
+        # FontSizeMappingTable
         self.font_size_mapping = {
-            "初号": Pt(42),
-            "小初": Pt(36),
-            "一号": Pt(26),
-            "小一": Pt(24),
-            "二号": Pt(22),
-            "小二": Pt(18),
-            "三号": Pt(16),
-            "小三": Pt(15),
-            "四号": Pt(14),
-            "小四": Pt(12),
-            "五号": Pt(10.5),
-            "小五": Pt(9),
-            "六号": Pt(7.5),
-            "小六": Pt(6.5),
-            "七号": Pt(5.5),
-            "八号": Pt(5)
+            "初Number": Pt(42),
+            "Small初": Pt(36),
+            "OneNumber": Pt(26),
+            "SmallOne": Pt(24),
+            "二Number": Pt(22),
+            "Small二": Pt(18),
+            "三Number": Pt(16),
+            "Small三": Pt(15),
+            "四Number": Pt(14),
+            "Small四": Pt(12),
+            "五Number": Pt(10.5),
+            "Small五": Pt(9),
+            "六Number": Pt(7.5),
+            "Small六": Pt(6.5),
+            "七Number": Pt(5.5),
+            "八Number": Pt(5)
         }
         
-        # 加载模板
+        # LoadTemplate
         self.load_templates()
         
-        app_logger.info(f"排版规则管理器初始化完成，加载了 {len(self.templates)} 个模板")
+        app_logger.info(f"FormattingRule管理器初始化Complete，加载了 {len(self.templates)} 个Template")
     
     def load_templates(self):
         """
-        加载所有预设模板
+        加载所Has预设Template
         
         Returns:
-            dict: 模板字典，键为模板名称，值为模板内容
+            dict: TemplateDictionary，键为Template name，Value为TemplateContent
         """
         self.templates = {}
         
         if not os.path.exists(self.templates_dir):
-            app_logger.warning(f"模板目录不存在: {self.templates_dir}")
+            app_logger.warning(f"TemplateDirectory不Exists: {self.templates_dir}")
             return self.templates
         
         for filename in os.listdir(self.templates_dir):
@@ -71,180 +71,180 @@ class FormatManager:
                         template = json5.loads(f.read())
                         template_name = template.get('name', os.path.splitext(filename)[0])
                         self.templates[template_name] = template
-                        app_logger.debug(f"加载模板: {template_name}")
+                        app_logger.debug(f"加载Template: {template_name}")
                 except Exception as e:
-                    app_logger.error(f"加载模板失败: {template_path}, 错误: {str(e)}")
+                    app_logger.error(f"加载TemplateFailed: {template_path}, Error: {str(e)}")
         
         return self.templates
     
     def get_templates(self):
         """
-        获取所有模板
+        获取所HasTemplate
         
         Returns:
-            dict: 模板字典
+            dict: TemplateDictionary
         """
         return self.templates
     
     def get_template_names(self):
         """
-        获取所有模板名称
+        获取所HasTemplate name
         
         Returns:
-            list: 模板名称列表
+            list: Template nameList
         """
         return list(self.templates.keys())
     
     def get_template(self, template_name):
         """
-        获取指定名称的模板
+        获取指定名称的Template
         
         Args:
-            template_name: 模板名称
+            template_name: Template name
             
         Returns:
-            dict: 模板内容，如果模板不存在则返回None
+            dict: TemplateContent，IfTemplate不ExistsRuleReturnNone
         """
         return self.templates.get(template_name)
     
     def set_current_template(self, template_name):
         """
-        设置当前使用的模板
+        SettingsWhenPreviousUse的Template
         
         Args:
-            template_name: 模板名称
+            template_name: Template name
             
         Returns:
-            bool: 是否成功设置
+            bool: YesNoSuccessSettings
         """
         if template_name not in self.templates:
-            app_logger.warning(f"模板不存在: {template_name}")
+            app_logger.warning(f"Template不Exists: {template_name}")
             return False
         
         self.current_template = self.templates[template_name]
         self.current_template_name = template_name
-        app_logger.info(f"设置当前模板: {template_name}")
+        app_logger.info(f"SettingsWhenPreviousTemplate: {template_name}")
         return True
     
     def get_current_template(self):
         """
-        获取当前模板
+        获取WhenPreviousTemplate
         
         Returns:
-            dict: 当前模板内容
+            dict: WhenPreviousTemplateContent
         """
         return self.current_template
     
     def save_template(self, template_name, template_content):
         """
-        保存模板
+        保存Template
         
         Args:
-            template_name: 模板名称
-            template_content: 模板内容
+            template_name: Template name
+            template_content: TemplateContent
             
         Returns:
-            bool: 是否成功保存
+            bool: YesNoSuccess保存
         """
-        # 确保模板有name字段
+        # 确保TemplateHasnameField
         if 'name' not in template_content:
             template_content['name'] = template_name
         
-        # 更新内存中的模板
+        # UpdateInner存Center的Template
         self.templates[template_name] = template_content
         
-        # 保存到文件
-        # 记录保存路径信息，方便调试
+        # Save到File
+        # Record保存PathInformation，方便Debug
         template_file = os.path.join(self.templates_dir, f"{template_name}.json")
-        app_logger.debug(f"模板保存路径: {template_file}")
+        app_logger.debug(f"Template保存Path: {template_file}")
         
         try:
-            # 确保模板目录存在
+            # 确保TemplateDirectoryExists
             if not os.path.exists(self.templates_dir):
                 os.makedirs(self.templates_dir)
-                app_logger.debug(f"创建模板目录: {self.templates_dir}")
+                app_logger.debug(f"创建TemplateDirectory: {self.templates_dir}")
             
-            # 先删除同名模板文件（如果存在）
+            # 先Delete同名TemplateFile（IfExists）
             if os.path.exists(template_file):
                 os.remove(template_file)
-                app_logger.debug(f"删除原模板文件: {template_file}")
+                app_logger.debug(f"Delete原TemplateFile: {template_file}")
             
             with open(template_file, 'w', encoding='utf-8') as f:
                 json.dump(template_content, f, ensure_ascii=False, indent=4)
-                app_logger.info(f"保存模板: {template_name}")
+                app_logger.info(f"保存Template: {template_name}")
                 
-                # 验证文件是否写入成功
+                # ValidateFileYesNo写入Success
                 if os.path.exists(template_file):
-                    app_logger.debug(f"模板文件写入成功: {template_file}")
+                    app_logger.debug(f"TemplateFile写入Success: {template_file}")
                 else:
-                    app_logger.error(f"模板文件写入失败: {template_file}")
+                    app_logger.error(f"TemplateFile写入Failed: {template_file}")
                     
                 return True
         except Exception as e:
-            app_logger.error(f"保存模板失败: {template_name}, 错误: {str(e)}")
+            app_logger.error(f"保存TemplateFailed: {template_name}, Error: {str(e)}")
             return False
     
     def delete_template(self, template_name):
         """
-        删除模板
+        DeleteTemplate
         
         Args:
-            template_name: 模板名称
+            template_name: Template name
             
         Returns:
-            bool: 是否成功删除
+            bool: YesNoSuccessDelete
         """
         if template_name not in self.templates:
-            app_logger.warning(f"模板不存在: {template_name}")
+            app_logger.warning(f"Template不Exists: {template_name}")
             return False
         
-        # 从内存中删除
+        # 从Inner存CenterDelete
         del self.templates[template_name]
         
-        # 从文件系统中删除
+        # 从FileSystemCenterDelete
         template_file = os.path.join(self.templates_dir, f"{template_name}.json")
         if os.path.exists(template_file):
             try:
                 os.remove(template_file)
-                app_logger.info(f"删除模板: {template_name}")
+                app_logger.info(f"DeleteTemplate: {template_name}")
                 return True
             except Exception as e:
-                app_logger.error(f"删除模板文件失败: {template_name}, 错误: {str(e)}")
+                app_logger.error(f"DeleteTemplateFileFailed: {template_name}, Error: {str(e)}")
                 return False
         return True
     
     def create_default_template(self):
         """
-        创建默认模板
+        创建DefaultTemplate
         
         Returns:
-            dict: 默认模板内容
+            dict: DefaultTemplateContent
         """
         default_template = {
-            "name": "默认模板",
-            "description": "基本排版模板，适用于一般文档",
+            "name": "DefaultTemplate",
+            "description": "BasicFormattingTemplate，适用于One般Document",
             "rules": {
                 "标题": {
-                    "font": "黑体",
-                    "size": "小二",
+                    "font": "Black体",
+                    "size": "Small二",
                     "bold": True,
                     "line_spacing": 1.0
                 },
-                "一级标题": {
-                    "font": "黑体",
-                    "size": "五号",
+                "OneLevel标题": {
+                    "font": "Black体",
+                    "size": "五Number",
                     "bold": True,
                     "line_spacing": 1.5
                 },
-                "二级标题": {
+                "二Level标题": {
                     "font": "宋体",
-                    "size": "五号",
+                    "size": "五Number",
                     "bold": True,
                     "line_spacing": 1.5
                 },
-                "正文": {
+                "正Document": {
                     "font": "宋体",
-                    "size": "五号",
+                    "size": "五Number",
                     "bold": False,
                     "line_spacing": 19
                 }
@@ -254,25 +254,25 @@ class FormatManager:
     
     def format_to_docx_params(self, format_instruction):
         """
-        将格式指令转换为docx参数
+        将Format指令Conversion为docxParameters
         
         Args:
-            format_instruction: 格式指令
+            format_instruction: Format指令
             
         Returns:
-            dict: docx参数
+            dict: docxParameters
         """
         docx_params = {}
         
-        # 字体名称
+        # Font名称
         if 'font' in format_instruction:
             docx_params['font_name'] = format_instruction['font']
         
-        # 字体大小
+        # FontSize
         if 'size' in format_instruction:
             size = format_instruction['size']
             if isinstance(size, str):
-                docx_params['font_size'] = self.font_size_mapping.get(size, Pt(10.5))  # 默认五号字体
+                docx_params['font_size'] = self.font_size_mapping.get(size, Pt(10.5))  # Default五NumberFont
             else:
                 docx_params['font_size'] = Pt(size)
         
@@ -284,11 +284,11 @@ class FormatManager:
         if 'italic' in format_instruction:
             docx_params['italic'] = format_instruction['italic']
         
-        # 下划线
+        # Down划线
         if 'underline' in format_instruction:
             docx_params['underline'] = format_instruction['underline']
         
-        # 行间距
+        # LineBetween距
         if 'line_spacing' in format_instruction:
             docx_params['line_spacing'] = format_instruction['line_spacing']
         
@@ -296,7 +296,7 @@ class FormatManager:
         if 'alignment' in format_instruction:
             docx_params['alignment'] = format_instruction['alignment']
         
-        # 首行缩进
+        # 首Line缩进
         if 'first_line_indent' in format_instruction:
             docx_params['first_line_indent'] = format_instruction['first_line_indent']
         
@@ -304,48 +304,48 @@ class FormatManager:
     
     def validate_template(self, template):
         """
-        验证模板格式是否正确
+        ValidateTemplateFormatYesNo正确
         
         Args:
-            template: 模板内容
+            template: TemplateContent
             
         Returns:
-            (bool, str): 是否有效及错误信息
+            (bool, str): YesNoValid及ErrorInformation
         """
-        # 检查必要字段
+        # Check必要Field
         if 'name' not in template:
-            return False, "模板缺少name字段"
+            return False, "Template缺少nameField"
         
         if 'rules' not in template:
-            return False, "模板缺少rules字段"
+            return False, "Template缺少rulesField"
         
         rules = template['rules']
         if not isinstance(rules, dict):
-            return False, "rules字段必须是字典类型"
+            return False, "rulesField必须YesDictionaryType"
         
-        # 检查每个规则
+        # CheckEachRule
         for element_type, format_rule in rules.items():
             if not isinstance(format_rule, dict):
-                return False, f"规则 '{element_type}' 必须是字典类型"
+                return False, f"Rule '{element_type}' 必须YesDictionaryType"
             
-            # 检查必要的格式字段
+            # Check必要的FormatField
             if 'font' not in format_rule:
-                return False, f"规则 '{element_type}' 缺少font字段"
+                return False, f"Rule '{element_type}' 缺少fontField"
             
             if 'size' not in format_rule:
-                return False, f"规则 '{element_type}' 缺少size字段"
+                return False, f"Rule '{element_type}' 缺少sizeField"
         
         return True, ""
     
     def get_template_as_text(self, template_name):
         """
-        获取模板的文本表示，用于显示
+        获取Template的DocumentBookTable示，用于Visible
         
         Args:
-            template_name: 模板名称
+            template_name: Template name
             
         Returns:
-            str: 模板的文本表示
+            str: Template的DocumentBookTable示
         """
         template = self.get_template(template_name)
         if not template:
@@ -355,7 +355,7 @@ class FormatManager:
         if 'description' in template:
             text += f"{template['description']}\n"
         
-        text += "\n格式规则:\n"
+        text += "\nFormatRule:\n"
         
         for element_type, format_rule in template.get('rules', {}).items():
             text += f"{element_type}: "
@@ -371,17 +371,17 @@ class FormatManager:
                 format_parts.append("粗体")
             
             if 'line_spacing' in format_rule:
-                format_parts.append(f"行距 {format_rule['line_spacing']}")
+                format_parts.append(f"Line距 {format_rule['line_spacing']}")
             
-            # 添加对齐方式显示
+            # Add对齐方式Visible
             if 'alignment' in format_rule:
                 alignment = format_rule['alignment']
                 alignment_display = {
-                    "left": "左对齐",
-                    "center": "居中",
-                    "right": "右对齐",
+                    "left": "Left对齐",
+                    "center": "居Center",
+                    "right": "Right对齐",
                     "justify": "两端对齐"
-                }.get(alignment, "左对齐")
+                }.get(alignment, "Left对齐")
                 format_parts.append(f"{alignment_display}")
             
             text += ", ".join(format_parts) + "\n"

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-工具模块包
+Tool模块包
 """
 
 from .logger import app_logger

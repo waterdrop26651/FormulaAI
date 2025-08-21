@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-用户界面模块包
+User界面模块包
 """
 
 from .main_window import MainWindow

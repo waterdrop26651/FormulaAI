@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-核心功能模块包
+CoreFunction模块包
 """
 
 from .doc_processor import DocProcessor
