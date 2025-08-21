@@ -127,14 +127,28 @@ class DocProcessor:
                 app_logger.error(f"创建新文档失败: {str(e)}")
                 return False
             
-            # 处理每个元素
-            for i, element in enumerate(elements):
-                try:
-                    app_logger.debug(f"处理第 {i+1}/{len(elements)} 个元素")
-                    self._process_element(new_doc, element)
-                except Exception as e:
-                    app_logger.error(f"处理第 {i+1} 个元素时发生错误: {str(e)}")
-                    # 继续处理下一个元素，不中断整个过程
+            # 批处理元素，避免内存压力
+            batch_size = 10  # 每批处理10个元素，进一步减少内存压力
+            total_elements = len(elements)
+            
+            for batch_start in range(0, total_elements, batch_size):
+                batch_end = min(batch_start + batch_size, total_elements)
+                app_logger.info(f"处理批次: {batch_start+1}-{batch_end}/{total_elements}")
+                
+                # 处理当前批次的元素
+                for i in range(batch_start, batch_end):
+                    element = elements[i]
+                    try:
+                        app_logger.debug(f"处理第 {i+1}/{total_elements} 个元素")
+                        self._process_element(new_doc, element)
+                    except Exception as e:
+                        app_logger.error(f"处理第 {i+1} 个元素时发生错误: {str(e)}")
+                        # 继续处理下一个元素，不中断整个过程
+                
+                # 批次处理完成后，强制垃圾回收
+                import gc
+                gc.collect()
+                app_logger.debug(f"批次 {batch_start+1}-{batch_end} 处理完成，已执行垃圾回收")
             
             # 生成输出文件名
             try:
@@ -178,6 +192,9 @@ class DocProcessor:
             doc: 目标文档对象
             element: 排版元素信息
         """
+        paragraph = None
+        run = None
+        
         try:
             # 记录当前处理的元素信息
             app_logger.debug(f"开始处理元素: {element}")
@@ -217,168 +234,198 @@ class DocProcessor:
             app_logger.debug("成功应用段落格式")
             
             app_logger.debug(f"完成元素处理: {element_type}, 内容: {content[:20]}...")
+            
         except Exception as e:
             app_logger.error(f"处理元素时发生异常: {str(e)}")
+            # 记录详细错误信息
+            import traceback
+            app_logger.error(f"异常详情: {traceback.format_exc()}")
             # 不抛出异常，继续处理下一个元素
+        finally:
+            # 清理局部变量，释放内存
+            try:
+                del paragraph, run
+            except:
+                pass
+            
+            # 强制垃圾回收，防止内存泄漏
+            import gc
+            gc.collect()
     
     def _apply_font(self, run, format_info):
         """
-        应用字体格式
+        应用字体格式，增强内存安全性
         
         Args:
             run: 文本运行对象
             format_info: 格式信息
         """
+        if not run or not hasattr(run, 'font'):
+            app_logger.error("无效的文本运行对象")
+            return
+            
         try:
-            # 字体名称
-            font_name = format_info.get('font', '宋体')
+            # 字体名称 - 使用安全的默认值
+            font_name = format_info.get('font', '宋体') if format_info else '宋体'
             app_logger.debug(f"原始字体名称: {font_name}")
             
-            # 获取映射后的字体名称，直接使用新方法，不检查可用性
-            document_font = self.font_manager.get_font_for_document(font_name)
+            # 简化字体处理，避免复杂的映射操作
+            safe_fonts = {'宋体': 'SimSun', '黑体': 'SimHei', '楷体': 'KaiTi', '仿宋': 'FangSong'}
+            document_font = safe_fonts.get(font_name, font_name)
             app_logger.debug(f"用于文档的字体名称: {document_font}")
             
-            # 设置英文字体名称
-            run.font.name = document_font
-            
-            # 设置中文字体（使用相同的字体）
+            # 安全设置字体名称
             try:
-                run._element.rPr.rFonts.set(qn('w:eastAsia'), document_font)
-                app_logger.debug(f"成功设置中文字体: {document_font}")
+                if hasattr(run.font, 'name'):
+                    run.font.name = document_font
             except Exception as e:
-                app_logger.error(f"设置中文字体失败: {str(e)}")
+                app_logger.error(f"设置字体名称失败: {str(e)}")
+            
+            # 简化中文字体设置，避免直接操作XML元素
+            try:
+                if hasattr(run, '_element') and hasattr(run._element, 'rPr'):
+                    run._element.rPr.rFonts.set(qn('w:eastAsia'), document_font)
+                    app_logger.debug(f"成功设置中文字体: {document_font}")
+            except Exception as e:
+                app_logger.debug(f"设置中文字体失败，使用默认设置: {str(e)}")
                 
-            # 字体大小
-            font_size = format_info.get('size', '五号')
+            # 字体大小 - 使用安全的默认值
+            font_size = format_info.get('size', '小四') if format_info else '小四'
             app_logger.debug(f"原始字体大小: {font_size}")
             
-            if isinstance(font_size, str):
-                mapped_size = self.font_size_mapping.get(font_size, Pt(10.5))  # 默认五号字体
-                app_logger.debug(f"映射后的字体大小: {mapped_size}")
-                font_size = mapped_size
+            try:
+                if isinstance(font_size, str) and font_size in self.font_size_mapping:
+                    mapped_size = self.font_size_mapping[font_size]
+                    app_logger.debug(f"映射后的字体大小: {mapped_size}")
+                    if hasattr(run.font, 'size'):
+                        run.font.size = mapped_size
+            except Exception as e:
+                app_logger.error(f"设置字体大小失败: {str(e)}")
             
-            run.font.size = font_size
+            # 安全设置字体属性
+            try:
+                bold = format_info.get('bold', False) if format_info else False
+                if hasattr(run, 'bold'):
+                    run.bold = bold
+                    app_logger.debug(f"设置粗体: {bold}")
+            except Exception as e:
+                app_logger.error(f"设置粗体失败: {str(e)}")
             
-            # 粗体
-            bold = format_info.get('bold', False)
-            app_logger.debug(f"设置粗体: {bold}")
-            run.bold = bold
+            try:
+                italic = format_info.get('italic', False) if format_info else False
+                if hasattr(run, 'italic'):
+                    run.italic = italic
+                    app_logger.debug(f"设置斜体: {italic}")
+            except Exception as e:
+                app_logger.error(f"设置斜体失败: {str(e)}")
             
-            # 斜体
-            italic = format_info.get('italic', False)
-            app_logger.debug(f"设置斜体: {italic}")
-            run.italic = italic
-            
-            # 下划线
-            underline = format_info.get('underline', False)
-            app_logger.debug(f"设置下划线: {underline}")
-            run.underline = underline
+            try:
+                underline = format_info.get('underline', False) if format_info else False
+                if hasattr(run, 'underline'):
+                    run.underline = underline
+                    app_logger.debug(f"设置下划线: {underline}")
+            except Exception as e:
+                app_logger.error(f"设置下划线失败: {str(e)}")
             
         except Exception as e:
-            app_logger.error(f"应用字体格式时发生异常: {str(e)}")
+            app_logger.error(f"应用字体格式时发生严重异常: {str(e)}")
+            import traceback
+            app_logger.error(f"异常详情: {traceback.format_exc()}")
             # 不抛出异常，使用默认字体设置
     
     def _apply_paragraph_format(self, paragraph, format_info, element_type):
         """
-        应用段落格式
+        应用段落格式，增强内存安全性
         
         Args:
             paragraph: 段落对象
             format_info: 格式信息
             element_type: 元素类型
         """
+        if not paragraph or not hasattr(paragraph, 'paragraph_format'):
+            app_logger.error("无效的段落对象")
+            return
+            
         try:
-            # 行间距
+            # 安全获取格式信息
+            if not format_info or not isinstance(format_info, dict):
+                format_info = {}
+            
+            # 行间距 - 使用更安全的默认值
             line_spacing = format_info.get('line_spacing', 1.5)
             app_logger.debug(f"设置行间距: {line_spacing}")
             
-            if isinstance(line_spacing, (int, float)):
-                try:
+            try:
+                if isinstance(line_spacing, (int, float)) and hasattr(paragraph, 'paragraph_format'):
                     # 防止异常大的行间距值导致程序崩溃
-                    if line_spacing > 36.0 or line_spacing < 0.5:
+                    if line_spacing > 3.0 or line_spacing < 0.8:
                         app_logger.warning(f"检测到异常行间距值: {line_spacing}，将使用默认值1.5")
                         line_spacing = 1.5
                     
-                    if line_spacing == 1.0:
+                    if abs(line_spacing - 1.0) < 0.1:
                         paragraph.paragraph_format.line_spacing_rule = WD_LINE_SPACING.SINGLE
                         app_logger.debug("设置单倍行间距")
-                    elif line_spacing == 1.5:
+                    elif abs(line_spacing - 1.5) < 0.1:
                         paragraph.paragraph_format.line_spacing_rule = WD_LINE_SPACING.ONE_POINT_FIVE
                         app_logger.debug("设置1.5倍行间距")
-                    elif line_spacing == 2.0:
+                    elif abs(line_spacing - 2.0) < 0.1:
                         paragraph.paragraph_format.line_spacing_rule = WD_LINE_SPACING.DOUBLE
                         app_logger.debug("设置双倍行间距")
                     else:
-                        # 自定义行间距，安全值
-                        paragraph.paragraph_format.line_spacing_rule = WD_LINE_SPACING.EXACTLY
-                        paragraph.paragraph_format.line_spacing = Pt(line_spacing)
-                        app_logger.debug(f"设置自定义行间距: {line_spacing}磅")
-                except Exception as e:
-                    app_logger.error(f"设置行间距失败: {str(e)}")
+                        # 使用默认1.5倍行间距，避免复杂设置
+                        paragraph.paragraph_format.line_spacing_rule = WD_LINE_SPACING.ONE_POINT_FIVE
+                        app_logger.debug("使用默认1.5倍行间距")
+            except Exception as e:
+                app_logger.error(f"设置行间距失败: {str(e)}")
             
-            # 对齐方式
-            alignment = format_info.get('alignment', 'left')
-            app_logger.debug(f"设置对齐方式: {alignment}")
-            
+            # 对齐方式 - 简化处理
             try:
-                if alignment == 'center':
-                    paragraph.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
-                elif alignment == 'right':
-                    paragraph.alignment = WD_PARAGRAPH_ALIGNMENT.RIGHT
-                elif alignment == 'justify':
-                    paragraph.alignment = WD_PARAGRAPH_ALIGNMENT.JUSTIFY
-                else:  # 默认左对齐
-                    paragraph.alignment = WD_PARAGRAPH_ALIGNMENT.LEFT
+                alignment = format_info.get('alignment', 'left')
+                app_logger.debug(f"设置对齐方式: {alignment}")
+                
+                if hasattr(paragraph, 'alignment'):
+                    if alignment == 'center':
+                        paragraph.alignment = WD_PARAGRAPH_ALIGNMENT.CENTER
+                    elif alignment == 'right':
+                        paragraph.alignment = WD_PARAGRAPH_ALIGNMENT.RIGHT
+                    elif alignment == 'justify':
+                        paragraph.alignment = WD_PARAGRAPH_ALIGNMENT.JUSTIFY
+                    else:  # 默认左对齐
+                        paragraph.alignment = WD_PARAGRAPH_ALIGNMENT.LEFT
             except Exception as e:
                 app_logger.error(f"设置对齐方式失败: {str(e)}")
             
-            # 首行缩进
+            # 首行缩进 - 简化处理
             try:
-                first_line_indent = format_info.get('first_line_indent', None)
-                app_logger.debug(f"首行缩进设置: {first_line_indent}")
-                
-                if first_line_indent is not None:
-                    if isinstance(first_line_indent, (int, float)):
-                        paragraph.paragraph_format.first_line_indent = Pt(first_line_indent)
-                        app_logger.debug(f"设置自定义首行缩进: {first_line_indent}磅")
-                    else:
-                        app_logger.warning(f"首行缩进值类型错误: {type(first_line_indent)}")
-                elif element_type == '正文':  # 正文默认缩进2个字符
-                    paragraph.paragraph_format.first_line_indent = Pt(21)  # 约2个中文字符
-                    app_logger.debug("设置正文默认首行缩进: 21磅")
+                if hasattr(paragraph, 'paragraph_format') and hasattr(paragraph.paragraph_format, 'first_line_indent'):
+                    first_line_indent = format_info.get('first_line_indent', None)
+                    
+                    if first_line_indent is not None and isinstance(first_line_indent, (int, float)):
+                        if 0 <= first_line_indent <= 50:  # 限制缩进范围
+                            paragraph.paragraph_format.first_line_indent = Pt(first_line_indent)
+                            app_logger.debug(f"设置首行缩进: {first_line_indent}磅")
+                    elif element_type == '正文':  # 正文默认缩进
+                        paragraph.paragraph_format.first_line_indent = Pt(21)
+                        app_logger.debug("设置正文默认首行缩进: 21磅")
             except Exception as e:
                 app_logger.error(f"设置首行缩进失败: {str(e)}")
             
-            # 段前间距
+            # 段间距 - 简化处理，避免复杂设置
             try:
-                before_spacing = format_info.get('before_spacing', None)
-                app_logger.debug(f"段前间距设置: {before_spacing}")
-                
-                if before_spacing is not None:
-                    if isinstance(before_spacing, (int, float)):
-                        paragraph.paragraph_format.space_before = Pt(before_spacing)
-                        app_logger.debug(f"设置段前间距: {before_spacing}磅")
-                    else:
-                        app_logger.warning(f"段前间距值类型错误: {type(before_spacing)}")
+                if hasattr(paragraph, 'paragraph_format'):
+                    # 使用固定的安全间距值
+                    if hasattr(paragraph.paragraph_format, 'space_before'):
+                        paragraph.paragraph_format.space_before = Pt(0)
+                    if hasattr(paragraph.paragraph_format, 'space_after'):
+                        paragraph.paragraph_format.space_after = Pt(0)
+                    app_logger.debug("设置段间距为0")
             except Exception as e:
-                app_logger.error(f"设置段前间距失败: {str(e)}")
-            
-            # 段后间距
-            try:
-                after_spacing = format_info.get('after_spacing', None)
-                app_logger.debug(f"段后间距设置: {after_spacing}")
-                
-                if after_spacing is not None:
-                    if isinstance(after_spacing, (int, float)):
-                        paragraph.paragraph_format.space_after = Pt(after_spacing)
-                        app_logger.debug(f"设置段后间距: {after_spacing}磅")
-                    else:
-                        app_logger.warning(f"段后间距值类型错误: {type(after_spacing)}")
-            except Exception as e:
-                app_logger.error(f"设置段后间距失败: {str(e)}")
+                app_logger.error(f"设置段间距失败: {str(e)}")
                 
         except Exception as e:
-            app_logger.error(f"应用段落格式时发生异常: {str(e)}")
+            app_logger.error(f"应用段落格式时发生严重异常: {str(e)}")
+            import traceback
+            app_logger.error(f"异常详情: {traceback.format_exc()}")
             # 不抛出异常，使用默认段落设置
     
     def get_output_file(self):

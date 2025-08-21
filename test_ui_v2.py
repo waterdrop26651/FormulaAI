@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-FormulaAI - AI智能文档排版工具
+测试新UI架构
 
-主启动脚本，采用重构后的双面板布局和模块化设计
+用于测试重构后的双面板布局和模块化设计
 """
 
 import sys
@@ -26,35 +26,27 @@ from src.utils.logger import app_logger
 
 def main():
     """
-    主函数 - 启动FormulaAI应用程序
+    主函数 - 启动新UI测试
     """
     # 创建应用程序
     app = QApplication(sys.argv)
-    app.setApplicationName("FormulaAI")
-    app.setApplicationVersion("1.0.0")
+    app.setApplicationName("FormulaAI V2")
+    app.setApplicationVersion("2.0.0")
     
     # 设置应用程序属性 (PyQt6中已自动启用高DPI支持)
     # app.setAttribute(Qt.ApplicationAttribute.AA_EnableHighDpiScaling)  # PyQt6中已移除
     # app.setAttribute(Qt.ApplicationAttribute.AA_UseHighDpiPixmaps)     # PyQt6中已移除
-    
-    # 强制使用浅色主题，不受系统暗色模式影响
-    app.setStyleSheet("""
-        QApplication {
-            background-color: #ffffff;
-            color: #333333;
-        }
-    """)
     
     try:
         # 创建主窗口
         window = MainWindowV2()
         window.show()
         
-        app_logger.info("FormulaAI 启动成功")
-        app_logger.info("架构特点:")
+        app_logger.info("FormulaAI V2 启动成功")
+        app_logger.info("新架构特点:")
         app_logger.info("- 双面板布局: 文档管理 + 模板设置")
         app_logger.info("- 模块化设计: 每个面板独立")
-        app_logger.info("- 简洁架构: 无超过3层缩进")
+        app_logger.info("- 消除复杂度: 无超过3层缩进")
         app_logger.info("- 事件驱动: 面板间通过信号通信")
         
         # 运行应用程序

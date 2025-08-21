@@ -35,6 +35,7 @@ class FontManager:
         self.display_name_mapping = {}  # 系统字体名称到显示名称的映射
         self.system_to_display_mapping = {}  # 系统字体名称到显示名称的映射
         self.display_to_system_mapping = {}  # 显示名称到系统字体名称的映射
+        self.font_availability_cache = {}  # 字体可用性缓存，避免重复检查
         
         # 加载字体信息
         self.load_system_fonts()
@@ -442,7 +443,7 @@ class FontManager:
     
     def is_font_available(self, font_name):
         """
-        检查字体是否可用，采用更宽松的检测机制
+        检查字体是否可用，使用缓存机制提高性能
         
         Args:
             font_name: 要检查的字体名称
@@ -450,58 +451,40 @@ class FontManager:
         Returns:
             bool: 字体是否可用
         """
-        # 1. 直接检查系统字体列表
-        if font_name in self.system_fonts:
-            return True
+        # 检查缓存
+        if font_name in self.font_availability_cache:
+            return self.font_availability_cache[font_name]
         
-        # 2. 通过映射检查
-        mapped_font = self.font_mapping.get(font_name)
-        if mapped_font and mapped_font in self.system_fonts:
-            return True
+        result = False
         
-        # 3. 检查字体名称的小写版本（不区分大小写）
-        for system_font in self.system_fonts:
-            if font_name.lower() == system_font.lower():
-                return True
-        
-        # 4. 检查字体名称是否包含在系统字体中（部分匹配）
-        # 这对于处理带有额外后缀或前缀的字体名称很有用
-        for system_font in self.system_fonts:
-            if font_name in system_font or system_font in font_name:
-                return True
-        
-        # 5. 特殊处理常用中文字体（Word兼容性）
-        common_fonts = {
-            '宋体': ['Songti', 'SimSun', 'Song'],
-            '黑体': ['Heiti', 'SimHei'],
-            '楷体': ['Kaiti', 'KaiTi'],
-            '仿宋': ['Fangsong', 'FangSong'],
-            '微软雅黑': ['Microsoft YaHei', 'MYingHei', 'YaHei']
-        }
-        
-        # 检查是否是常用中文字体
-        for common_font, aliases in common_fonts.items():
-            if font_name == common_font:
-                # 检查别名是否在系统字体中
-                for alias in aliases:
-                    for system_font in self.system_fonts:
-                        if alias in system_font:
-                            app_logger.info(f"字体 '{font_name}' 使用别名 '{system_font}' 可用")
-                            return True
-        
-        # 6. 创建一个测试字体对象，看是否能成功创建
         try:
-            test_font = QFont(font_name)
-            actual_family = test_font.family()
+            # 1. 直接检查系统字体列表
+            if font_name in self.system_fonts:
+                result = True
             
-            # 如果实际字体族不是我们请求的，并且不是默认字体，那么可能是找到了替代字体
-            if actual_family != font_name and actual_family != "Arial" and actual_family != "System" and actual_family != ".AppleSystemUIFont":
-                app_logger.info(f"字体 '{font_name}' 被Qt映射到系统字体 '{actual_family}'，视为可用")
-                return True
+            # 2. 通过映射检查
+            elif font_name in self.font_mapping:
+                mapped_font = self.font_mapping[font_name]
+                if mapped_font in self.system_fonts:
+                    result = True
+            
+            # 3. 检查字体名称的小写版本（不区分大小写）
+            elif any(font_name.lower() == system_font.lower() for system_font in self.system_fonts):
+                result = True
+            
+            # 4. 特殊处理常用中文字体
+            elif font_name in ['宋体', '黑体', '楷体', '仿宋', '微软雅黑']:
+                result = True  # 这些字体在Word中通常都可用
+            
+            # 缓存结果
+            self.font_availability_cache[font_name] = result
+            
         except Exception as e:
-            app_logger.debug(f"测试字体 '{font_name}' 时出错: {str(e)}")
+            app_logger.error(f"检查字体可用性时发生异常: {font_name}, 错误: {str(e)}")
+            result = True  # 发生异常时默认认为字体可用
+            self.font_availability_cache[font_name] = result
         
-        return False
+        return result
     
     def get_available_font(self, font_name, fallback="SimSun"):
         """

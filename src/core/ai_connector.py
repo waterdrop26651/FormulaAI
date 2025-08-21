@@ -121,6 +121,11 @@ class AIConnector:
 7. 必须严格按照提供的排版规则中的字体设置，不要自行替换或修改字体
 8. 对于学术论文格式，请特别注意正确识别摘要、关键词、参考文献等特殊部分
 9. 如果排版规则中包含对齐方式(alignment)设置，必须应用到相应的元素中
+10. **重要：必须为每个元素设置完整的格式属性，包括：**
+    - 标题类元素（标题、一级标题、二级标题等）：必须设置 "bold": true
+    - 正文类元素（正文、摘要等）：必须设置 "bold": false
+    - 所有元素都必须包含 font、size、bold、line_spacing、alignment 等完整属性
+    - 不要遗漏任何格式属性，确保生成的格式指令完整可用
 
 请以JSON格式返回排版指令，格式如下：
 {{
@@ -131,8 +136,31 @@ class AIConnector:
   "format": {{
     "font": "黑体",
     "size": "小二",
+    "bold": true,
     "line_spacing": 1.0,
     "alignment": "center"
+  }}
+}},
+{{
+  "type": "一级标题",
+  "content": "章节标题",
+  "format": {{
+    "font": "黑体",
+    "size": "三号",
+    "bold": true,
+    "line_spacing": 1.5,
+    "alignment": "left"
+  }}
+}},
+{{
+  "type": "正文",
+  "content": "正文内容",
+  "format": {{
+    "font": "宋体",
+    "size": "小四",
+    "bold": false,
+    "line_spacing": 1.5,
+    "alignment": "justify"
   }}
 }},
 ...

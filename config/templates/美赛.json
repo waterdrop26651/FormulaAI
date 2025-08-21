@@ -1,0 +1,52 @@
+{
+  "name": "美赛",
+  "description": "测试",
+  "elements": {
+    "name": "自定义模板",
+    "description": "从文本解析生成的模板",
+    "rules": {
+      "一级标题": {
+        "font": "宋体",
+        "size": "小二",
+        "bold": true,
+        "line_spacing": 1.5,
+        "alignment": "center"
+      },
+      "二级标题": {
+        "font": "宋体",
+        "size": "三号",
+        "bold": true,
+        "line_spacing": 1.5,
+        "alignment": "left"
+      },
+      "三级标题": {
+        "font": "宋体",
+        "size": "四号",
+        "bold": true,
+        "line_spacing": 1.5,
+        "alignment": "left"
+      },
+      "正文": {
+        "font": "宋体",
+        "size": "小四",
+        "bold": false,
+        "line_spacing": 1.5,
+        "alignment": "left"
+      },
+      "摘要标题": {
+        "font": "黑体",
+        "size": "小三",
+        "bold": true,
+        "line_spacing": 1.5,
+        "alignment": "center"
+      },
+      "关键词标题": {
+        "font": "黑体",
+        "size": "四号",
+        "bold": true,
+        "line_spacing": 1.5,
+        "alignment": "left"
+      }
+    }
+  }
+}

@@ -1,0 +1,66 @@
+{
+  "name": "11",
+  "description": "从文本解析生成的模板",
+  "elements": {
+    "name": "自定义模板",
+    "description": "从文本解析生成的模板",
+    "rules": {
+      "页面设置": {
+        "font": "宋体",
+        "size": "五号",
+        "bold": false,
+        "line_spacing": 1.5,
+        "alignment": "left"
+      },
+      "一级标题": {
+        "font": "Times New Roman",
+        "size": "小二",
+        "bold": true,
+        "line_spacing": 1.5,
+        "alignment": "center"
+      },
+      "二级标题": {
+        "font": "Times New Roman",
+        "size": "三号",
+        "bold": true,
+        "line_spacing": 1.5,
+        "alignment": "left"
+      },
+      "三级标题": {
+        "font": "Times New Roman",
+        "size": "四号",
+        "bold": true,
+        "line_spacing": 1.5,
+        "alignment": "left"
+      },
+      "正文": {
+        "font": "Times New Roman",
+        "size": "小四",
+        "bold": false,
+        "line_spacing": 1.5,
+        "alignment": "left"
+      },
+      "摘要_Abstract": {
+        "font": "Arial",
+        "size": "小三",
+        "bold": true,
+        "line_spacing": 1.5,
+        "alignment": "left"
+      },
+      "关键词_Key_words": {
+        "font": "Arial",
+        "size": "四号",
+        "bold": true,
+        "line_spacing": 1.5,
+        "alignment": "left"
+      },
+      "页码": {
+        "font": "宋体",
+        "size": "五号",
+        "bold": false,
+        "line_spacing": 1.5,
+        "alignment": "left"
+      }
+    }
+  }
+}
