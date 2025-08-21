@@ -1,17 +1,17 @@
 # -*- coding: utf-8 -*-
 """
-文档管理面板
+Document Management Panel
 
-职责：
-1. 文档选择和验证
-2. 文档信息显示
-3. 文档结构分析结果展示
-4. 保存位置设置
+Responsibilities:
+1. Document selection and validation
+2. Document information display
+3. Document structure analysis results display
+4. Save location settings
 
-设计原则：
-- 单一职责：只管文档相关操作
-- 无特殊情况：统一的错误处理
-- 简洁明了：最多2层缩进
+Design Principles:
+- Single responsibility: Only handles document-related operations
+- No special cases: Unified error handling
+- Simple and clear: Maximum 2 levels of indentation
 """
 
 import os
@@ -37,16 +37,16 @@ from ...core.structure_analyzer import StructureAnalyzer
 
 class DocumentPanel(QWidget):
     """
-    文档管理面板
+    Document Management Panel
     
-    信号：
-    - document_selected: 文档选择完成
-    - formatting_requested: 请求开始排版
+    Signals:
+    - document_selected: Document selection completed
+    - formatting_requested: Request to start formatting
     """
     
-    # 信号定义
-    document_selected = pyqtSignal(str)  # 文档路径
-    formatting_requested = pyqtSignal()  # 排版请求
+    # Signal definitions
+    document_selected = pyqtSignal(str)  # Document path
+    formatting_requested = pyqtSignal()  # Formatting request
     
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -63,19 +63,19 @@ class DocumentPanel(QWidget):
         self._init_ui()
         self._load_config()
         
-        app_logger.info("文档面板初始化完成")
+        app_logger.info("Document panel initialization completed")
     
     def _init_ui(self):
         """
-        初始化用户界面
+        Initialize user interface
         
-        布局（简化版）：
-        ┌─文档选择─────────┐
-        │ 文件路径         │
-        │ [浏览] [分析]    │
-        ├─保存设置─────────┤
-        │ 保存位置         │
-        └─操作按钮─────────┘
+        Layout (simplified):
+        ┌─Document Selection──┐
+        │ File path           │
+        │ [Browse] [Analyze]  │
+        ├─Save Settings──────┤
+        │ Save location       │
+        └─Action Buttons─────┘
         """
         layout = QVBoxLayout(self)
         layout.setContentsMargins(10, 10, 10, 10)
@@ -97,17 +97,17 @@ class DocumentPanel(QWidget):
         layout.addStretch()
     
     def _create_document_selection_group(self) -> QGroupBox:
-        """创建文档选择组"""
-        group = QGroupBox("文档选择")
+        """Create document selection group"""
+        group = QGroupBox("Document Selection")
         layout = QGridLayout(group)
         
-        # 文档路径标签
-        self.doc_path_label = QLabel("请选择Word文档:")
-        self.doc_path_value = QLabel("未选择文件")
+        # Document path labels
+        self.doc_path_label = QLabel("Select Word Document:")
+        self.doc_path_value = QLabel("No file selected")
         self.doc_path_value.setStyleSheet("color: gray; padding: 5px; border: 1px solid #ddd; border-radius: 3px;")
         
-        # 按钮
-        self.browse_btn = QPushButton("浏览...")
+        # Buttons
+        self.browse_btn = QPushButton("Browse...")
         
         # 连接信号
         self.browse_btn.clicked.connect(self._select_document)
@@ -122,15 +122,15 @@ class DocumentPanel(QWidget):
 
     
     def _create_save_settings_group(self) -> QGroupBox:
-        """创建保存设置组"""
-        group = QGroupBox("保存设置")
+        """Create save settings group"""
+        group = QGroupBox("Save Settings")
         layout = QGridLayout(group)
         
-        # 保存路径
-        self.save_path_label = QLabel("保存位置:")
-        self.save_path_value = QLabel("与源文件相同目录")
+        # Save path
+        self.save_path_label = QLabel("Save Location:")
+        self.save_path_value = QLabel("Same directory as source file")
         self.save_path_value.setStyleSheet("color: gray; padding: 5px; border: 1px solid #ddd; border-radius: 3px;")
-        self.save_browse_btn = QPushButton("浏览...")
+        self.save_browse_btn = QPushButton("Browse...")
         
         # 连接信号
         self.save_browse_btn.clicked.connect(self._select_save_directory)
@@ -142,12 +142,12 @@ class DocumentPanel(QWidget):
         return group
     
     def _create_action_buttons_group(self) -> QGroupBox:
-        """创建操作按钮组"""
-        group = QGroupBox("操作")
+        """Create action buttons group"""
+        group = QGroupBox("Actions")
         layout = QHBoxLayout(group)
         
-        # 开始排版按钮
-        self.format_btn = QPushButton("开始排版")
+        # Start formatting button
+        self.format_btn = QPushButton("Start Formatting")
         self.format_btn.setEnabled(False)
         self.format_btn.setMinimumHeight(40)
         self.format_btn.setStyleSheet("""
@@ -187,44 +187,44 @@ class DocumentPanel(QWidget):
             self.save_path_value.setStyleSheet("color: black; padding: 5px; border: 1px solid #ddd; border-radius: 3px;")
     
     def _select_document(self):
-        """选择文档"""
+        """Select document"""
         file_dialog = QFileDialog()
         file_path, _ = file_dialog.getOpenFileName(
             self,
-            "选择Word文档",
+            "Select Word Document",
             "",
-            "Word文档 (*.docx)"
+            "Word Documents (*.docx)"
         )
         
         if not file_path:
             return
         
-        # 验证文档
+        # Validate document
         if not is_valid_docx(file_path):
-            QMessageBox.warning(self, "无效文档", "所选文件不是有效的Word文档！")
+            QMessageBox.warning(self, "Invalid Document", "The selected file is not a valid Word document!")
             return
         
-        # 更新状态
+        # Update status
         self._selected_document = file_path
         self.doc_path_value.setText(os.path.basename(file_path))
         self.doc_path_value.setStyleSheet("color: black; padding: 5px; border: 1px solid #ddd; border-radius: 3px;")
         self.doc_path_value.setToolTip(file_path)
         
-        # 启用按钮
+        # Enable buttons
         self.format_btn.setEnabled(True)
         
-        # 发射信号
+        # Emit signal
         self.document_selected.emit(file_path)
         
-        app_logger.info(f"文档已选择: {file_path}")
+        app_logger.info(f"Document selected: {file_path}")
     
 
     
     def _select_save_directory(self):
-        """选择保存目录"""
+        """Select save directory"""
         directory = QFileDialog.getExistingDirectory(
             self,
-            "选择保存位置",
+            "Select Save Location",
             self._save_directory or ""
         )
         
@@ -233,30 +233,30 @@ class DocumentPanel(QWidget):
             self.save_path_value.setText(directory)
             self.save_path_value.setStyleSheet("color: black; padding: 5px; border: 1px solid #ddd; border-radius: 3px;")
             
-            # 保存配置
+            # Save configuration
             self.app_config["save_path"] = directory
             config_manager.save_app_config(self.app_config)
             
-            app_logger.info(f"保存位置已设置: {directory}")
+            app_logger.info(f"Save location set: {directory}")
     
     def _request_formatting(self):
-        """请求开始排版"""
+        """Request to start formatting"""
         if not self._selected_document:
-            QMessageBox.warning(self, "提示", "请先选择文档！")
+            QMessageBox.warning(self, "Notice", "Please select a document first!")
             return
         
-        # 发射排版请求信号
+        # Emit formatting request signal
         self.formatting_requested.emit()
     
-    # 公共接口方法
+    # Public interface methods
     def get_selected_document(self) -> Optional[str]:
-        """获取选择的文档路径"""
+        """Get selected document path"""
         return self._selected_document
     
     def get_save_directory(self) -> Optional[str]:
-        """获取保存目录"""
+        """Get save directory"""
         return self._save_directory
     
     def set_formatting_enabled(self, enabled: bool):
-        """设置排版按钮状态"""
+        """Set formatting button state"""
         self.format_btn.setEnabled(enabled and self._selected_document is not None)

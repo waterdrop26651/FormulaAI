@@ -1,158 +1,160 @@
-# FormulaAI - AI 智能文档排版工具
+# FormulaAI - AI-Powered Document Formatting Tool
 
 [![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![PyQt6](https://img.shields.io/badge/PyQt6-6.4.0+-green.svg)](https://pypi.org/project/PyQt6/)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-## 项目简介
+## Project Overview
 
-FormulaAI 是一款基于 AI 技术的智能文档排版工具，能够自动分析未排版的 Word 文档结构，并根据用户配置的排版规则进行专业排版。本工具特别适合学术论文、研究报告、技术文档等需要规范格式的文档处理。
+FormulaAI is an AI-powered intelligent document formatting tool that automatically analyzes unformatted Word document structures and applies professional formatting based on user-configured rules. This tool is particularly suitable for academic papers, research reports, technical documents, and other documents requiring standardized formatting.
 
-**项目致谢**：本项目沿用 `https://github.com/chenningling/AIPoliDoc` 的项目结构和部分代码。
+**Acknowledgments**: This project builds upon the project structure and partial code from `https://github.com/chenningling/AIPoliDoc`.
 
-## 主要功能
+## Key Features
 
-- **文档结构智能分析**：利用 AI 能力分析未排版文档的结构，自动识别标题、摘要、关键词、正文等内容
-- **排版规则管理**：
-  - 支持预设模板和自定义排版规则
-  - 提供多个预设模板（论文格式、研究报告等）
-  - 可自定义字体、段落、间距等详细排版参数
-- **自动排版**：根据识别的结构和排版规则自动排版文档
-- **多种 AI API 支持**：
-  - 支持配置多种 AI API 接口
-  - 默认支持 DeepSeek API
-  - 可扩展支持其他 AI 服务
-- **用户友好界面**：
-  - 直观的图形界面操作
-  - 实时预览排版效果
-  - 支持模板编辑和管理
-- **详细日志**：提供详细的处理日志和进度显示
+- **Intelligent Document Structure Analysis**: Leverages AI capabilities to analyze unformatted document structures, automatically identifying titles, abstracts, keywords, body text, and other content
+- **Formatting Rules Management**:
+  - Supports preset templates and custom formatting rules
+  - Provides multiple preset templates (academic paper format, research reports, etc.)
+  - Customizable fonts, paragraphs, spacing, and other detailed formatting parameters
+- **Automatic Formatting**: Automatically formats documents based on identified structure and formatting rules
+- **Multiple AI API Support**:
+  - Supports configuration of various AI API interfaces
+  - Default support for DeepSeek API
+  - Extensible support for other AI services
+- **User-Friendly Interface**:
+  - Intuitive graphical interface operation
+  - Real-time formatting preview
+  - Template editing and management support
+- **Detailed Logging**: Provides comprehensive processing logs and progress display
 
-## 系统要求
+## System Requirements
 
-- **操作系统**：
+- **Operating System**:
   - Windows 10/11
   - macOS 10.15+
-- **Python 环境**：
-  - Python 3.8 或更高版本
-- **依赖包**：
-  - python-docx >= 0.8.11 (Word文档处理)
-  - PyQt6 >= 6.4.0 (GUI界面)
-  - requests >= 2.28.1 (HTTP请求)
-  - pillow >= 9.3.0 (图像处理)
-  - chardet >= 5.0.0 (字符编码检测)
-  - json5 >= 0.9.10 (JSON处理)
+- **Python Environment**:
+  - Python 3.8 or higher
+- **Dependencies**:
+  - python-docx >= 0.8.11 (Word document processing)
+  - PyQt6 >= 6.4.0 (GUI interface)
+  - requests >= 2.28.1 (HTTP requests)
+  - pillow >= 9.3.0 (Image processing)
+  - chardet >= 5.0.0 (Character encoding detection)
+  - json5 >= 0.9.10 (JSON processing)
 
-## 架构设计
+## Architecture Design
 
+### V1 vs V2 Architecture Comparison
 
+FormulaAI has undergone a major architectural refactoring from V1 to V2, following Linus Torvalds' "good taste" design principles:
 
-#### V1 架构（传统单体设计）
-- **单一主窗口**：所有功能集中在一个复杂的主窗口类中
-- **紧耦合设计**：UI组件与业务逻辑混合，难以维护
-- **复杂的状态管理**：多层嵌套的条件判断和状态控制
-- **超过3层缩进**：违反了简洁性原则，代码可读性差
+#### V1 Architecture (Traditional Monolithic Design)
+- **Single Main Window**: All functionality concentrated in one complex main window class
+- **Tightly Coupled Design**: UI components mixed with business logic, difficult to maintain
+- **Complex State Management**: Multi-layered nested conditional judgments and state control
+- **Over 3 Levels of Indentation**: Violates simplicity principles, poor code readability
 
-#### V2 架构（模块化重构）
-基于 Linus "好品味"原则的全面重构：
+#### V2 Architecture (Modular Refactoring)
+Comprehensive refactoring based on Linus "good taste" principles:
 
-**1. 消除特殊情况**
-- 将复杂的条件分支重构为统一的数据流
-- 每个组件只处理一种职责，消除边界情况
+**1. Eliminate Special Cases**
+- Refactored complex conditional branches into unified data flow
+- Each component handles only one responsibility, eliminating edge cases
 
-**2. 简化数据结构**
-- 双面板布局：文档管理 + 模板设置
-- 事件驱动架构：面板间通过信号通信
-- 单一数据源：配置管理器统一管理状态
+**2. Simplified Data Structures**
+- Dual-panel layout: Document Management + Template Settings
+- Event-driven architecture: Panels communicate through signals
+- Single data source: Configuration manager unified state management
 
-**3. 模块化设计**
+**3. Modular Design**
 ```
 src/ui/
-├── main_window_v2.py    # 重构后的主窗口（简洁架构）
-├── panels/              # 独立面板模块
-│   ├── document_panel.py    # 文档管理面板
-│   ├── template_panel.py    # 模板设置面板
-│   └── status_panel.py      # 状态显示面板
-└── main_window.py       # V1主窗口（保留兼容性）
+├── main_window_v2.py    # Refactored main window (clean architecture)
+├── panels/              # Independent panel modules
+│   ├── document_panel.py    # Document management panel
+│   ├── template_panel.py    # Template settings panel
+│   └── status_panel.py      # Status display panel
+└── main_window.py       # V1 main window (backward compatibility)
 ```
 
-**4. 核心原则体现**
-- **"Never break userspace"**：V1和V2并存，保证向后兼容
-- **"简洁执念"**：无超过3层缩进，每个函数单一职责
-- **"实用主义"**：解决实际问题，不追求理论完美
+**4. Core Principles Implementation**
+- **"Never break userspace"**: V1 and V2 coexist, ensuring backward compatibility
+- **"Simplicity obsession"**: No more than 3 levels of indentation, single responsibility per function
+- **"Pragmatism"**: Solve real problems, don't pursue theoretical perfection
 
-### 技术架构优势
+### Technical Architecture Advantages
 
-#### V2 相比 V1 的改进：
+#### V2 Improvements over V1:
 
-1. **内存安全性**
-   - 批处理机制：避免大文档内存溢出
-   - 防御性编程：每个操作都有安全检查
-   - 垃圾回收优化：及时释放不需要的对象
+1. **Memory Safety**
+   - Batch processing mechanism: Prevents memory overflow for large documents
+   - Defensive programming: Safety checks for every operation
+   - Garbage collection optimization: Timely release of unnecessary objects
 
-2. **稳定性提升**
-   - 消除段错误：通过安全的字体处理和对象验证
-   - 错误隔离：单个组件失败不影响整体
-   - 优雅降级：遇到问题时自动使用默认配置
+2. **Stability Enhancement**
+   - Eliminate segmentation faults: Through safe font handling and object validation
+   - Error isolation: Single component failure doesn't affect the whole system
+   - Graceful degradation: Automatically uses default configuration when problems occur
 
-3. **可维护性**
-   - 模块独立：每个面板可以独立开发和测试
-   - 清晰接口：组件间通过定义良好的信号通信
-   - 代码简洁：遵循"好品味"原则，易于理解和修改
+3. **Maintainability**
+   - Module independence: Each panel can be developed and tested independently
+   - Clear interfaces: Components communicate through well-defined signals
+   - Clean code: Follows "good taste" principles, easy to understand and modify
 
-## 项目结构
+## Project Structure
 
 ```
 FormulaAI/
-├── config/                # 配置文件目录
-│   ├── api_config.json   # AI API配置
-│   ├── app_config.json   # 应用配置
-│   ├── font_mapping.json # 字体映射配置
-│   └── templates/        # 排版模板目录
-├── src/                  # 源代码目录
-│   ├── core/            # 核心功能模块
-│   │   ├── ai_connector.py     # AI服务连接器
-│   │   ├── doc_processor.py    # 文档处理器（V2优化）
-│   │   ├── format_manager.py   # 格式管理器
-│   │   ├── structure_analyzer.py# 结构分析器
-│   │   └── text_template_parser.py # 文本解析器
-│   ├── ui/              # 用户界面模块
-│   │   ├── main_window_v2.py   # V2主窗口（推荐）
-│   │   ├── main_window.py      # V1主窗口（兼容）
-│   │   ├── panels/            # V2面板模块
+├── config/                # Configuration files directory
+│   ├── api_config.json   # AI API configuration
+│   ├── app_config.json   # Application configuration
+│   ├── font_mapping.json # Font mapping configuration
+│   └── templates/        # Formatting templates directory
+├── src/                  # Source code directory
+│   ├── core/            # Core functionality modules
+│   │   ├── ai_connector.py     # AI service connector
+│   │   ├── doc_processor.py    # Document processor (V2 optimized)
+│   │   ├── format_manager.py   # Format manager
+│   │   ├── structure_analyzer.py# Structure analyzer
+│   │   └── text_template_parser.py # Text parser
+│   ├── ui/              # User interface modules
+│   │   ├── main_window_v2.py   # V2 main window (recommended)
+│   │   ├── main_window.py      # V1 main window (compatibility)
+│   │   ├── panels/            # V2 panel modules
 │   │   │   ├── document_panel.py
 │   │   │   ├── template_panel.py
 │   │   │   └── status_panel.py
-│   │   ├── template_editor.py  # 模板编辑器
-│   │   └── api_config_dialog.py# API配置对话框
-│   └── utils/           # 工具类模块
-│       ├── font_manager.py    # 字体管理器（V2优化）
-│       ├── config_manager.py  # 配置管理器
-│       └── logger.py         # 日志系统
-├── main.py              # 主程序入口（默认使用V2）
-└── requirements.txt     # 依赖包列表
+│   │   ├── template_editor.py  # Template editor
+│   │   └── api_config_dialog.py# API configuration dialog
+│   └── utils/           # Utility modules
+│       ├── font_manager.py    # Font manager (V2 optimized)
+│       ├── config_manager.py  # Configuration manager
+│       └── logger.py         # Logging system
+├── main.py              # Main program entry (uses V2 by default)
+└── requirements.txt     # Dependencies list
 ```
 
-## 安装方法
+## Installation
 
-1. 克隆项目代码：
+1. Clone the project:
    ```bash
    git clone https://github.com/waterdropjack/FormulaAI.git
    cd FormulaAI
    ```
 
-2. 安装 Python 环境（如果尚未安装）
+2. Install Python environment (if not already installed)
 
-3. 安装依赖包：
+3. Install dependencies:
    ```bash
    pip install -r requirements.txt
    ```
 
-## 配置说明
+## Configuration
 
-1. 首次使用需要配置 AI API：
-   - 复制 `config/api_config.example.json` 为 `config/api_config.json`
-   - 在 `api_config.json` 中填入你的 API 配置信息：
+1. First-time setup requires AI API configuration:
+   - Copy `config/api_config.example.json` to `config/api_config.json`
+   - Fill in your API configuration in `api_config.json`:
      ```json
      {
          "api_url": "https://your-api-endpoint.com/v1/chat/completions",
@@ -161,57 +163,57 @@ FormulaAI/
      }
      ```
 
-2. 应用配置：
-   - `config/app_config.json` 中可以配置保存路径、窗口大小等
-   - `config/font_mapping.json` 中可以配置字体映射关系
+2. Application configuration:
+   - Configure save paths, window size, etc. in `config/app_config.json`
+   - Configure font mapping relationships in `config/font_mapping.json`
 
-## 使用说明
+## Usage Instructions
 
-1. 启动程序：
+1. Start the program:
    ```bash
    python main.py
    ```
 
-2. 基本使用流程：
-   - 选择需要排版的 Word 文档
-   - 选择或自定义排版模板
-   - 点击"开始排版"按钮
-   - 等待排版完成，查看结果
+2. Basic usage workflow:
+   - Select the Word document to be formatted
+   - Choose or customize a formatting template
+   - Click the "Start Formatting" button
+   - Wait for formatting to complete and view results
 
-3. 模板管理：
-   - 在模板编辑器中可以创建、编辑、删除模板
-   - 每个模板可以设置不同层级标题、正文等的格式
-   - 支持导入导出模板配置
+3. Template management:
+   - Create, edit, and delete templates in the template editor
+   - Each template can set formats for different level headings, body text, etc.
+   - Supports importing and exporting template configurations
 
-4. 注意事项：
-   - 首次使用需要配置 AI API 信息
-   - 建议在正式排版前先备份原文档
-   - 如遇到问题，可查看日志文件了解详情
+4. Important notes:
+   - First-time use requires AI API configuration
+   - Recommend backing up original documents before formal formatting
+   - If problems occur, check log files for details
 
-## 常见问题
+## Frequently Asked Questions
 
-1. API 配置问题：
-   - 确保 API 密钥正确
-   - 检查网络连接是否正常
-   - 确认 API 服务是否可用
+1. API configuration issues:
+   - Ensure API key is correct
+   - Check network connection
+   - Confirm API service availability
 
-2. 字体问题：
-   - 确保系统安装了模板中使用的字体
-   - 可以在 `font_mapping.json` 中配置字体替代方案
+2. Font issues:
+   - Ensure system has fonts used in templates installed
+   - Configure font alternatives in `font_mapping.json`
 
-3. 排版效果问题：
-   - 检查文档结构是否规范
-   - 调整模板中的排版参数
-   - 查看日志了解 AI 识别结果
+3. Formatting effect issues:
+   - Check if document structure is standardized
+   - Adjust formatting parameters in templates
+   - Check logs to understand AI recognition results
 
-## 贡献指南
+## Contributing
 
-欢迎提交 Issue 和 Pull Request 来帮助改进项目。在提交代码前，请确保：
+Welcome to submit Issues and Pull Requests to help improve the project. Before submitting code, please ensure:
 
-1. 代码符合项目的编码规范
-2. 添加了必要的注释和文档
-3. 通过了所有测试用例
+1. Code follows project coding standards
+2. Added necessary comments and documentation
+3. Passed all test cases
 
-## 许可证
+## License
 
-本项目采用 MIT 许可证，详见 LICENSE 文件。
+This project is licensed under the MIT License. See the LICENSE file for details.
