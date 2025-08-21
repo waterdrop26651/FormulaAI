@@ -1,0 +1,62 @@
+{
+    "name": "数学建模论文",
+    "description": "数学建模国赛论文标准格式",
+    "rules": {
+        "论文题目": {
+            "font": "黑体",
+            "size": "四号",
+            "bold": true,
+            "line_spacing": 1.5,
+            "alignment": "center"
+        },
+        "一级标题": {
+            "font": "黑体",
+            "size": "四号",
+            "bold": true,
+            "line_spacing": 1.5,
+            "alignment": "center"
+        },
+        "二级标题": {
+            "font": "黑体",
+            "size": "小四",
+            "bold": true,
+            "line_spacing": 1.25,
+            "alignment": "left"
+        },
+        "摘要": {
+            "font": "宋体",
+            "size": "小四",
+            "bold": false,
+            "line_spacing": 1.25,
+            "alignment": "left"
+        },
+        "关键词": {
+            "font": "宋体",
+            "size": "小四",
+            "bold": false,
+            "line_spacing": 1.25,
+            "alignment": "left"
+        },
+        "正文": {
+            "font": "宋体",
+            "size": "小四",
+            "bold": false,
+            "line_spacing": 1.25,
+            "alignment": "left"
+        },
+        "参考文献": {
+            "font": "宋体",
+            "size": "小四",
+            "bold": false,
+            "line_spacing": 1.25,
+            "alignment": "left"
+        },
+        "附录": {
+            "font": "宋体",
+            "size": "小四",
+            "bold": false,
+            "line_spacing": 1.25,
+            "alignment": "left"
+        }
+    }
+}

@@ -1,0 +1,90 @@
+{
+    "name": "数模2",
+    "description": "从文本解析生成的模板",
+    "rules": {
+        "论文题目": {
+            "font": "黑体",
+            "size": "四号",
+            "bold": true,
+            "line_spacing": 1.5,
+            "alignment": "center"
+        },
+        "一级标题": {
+            "font": "黑体",
+            "size": "四号",
+            "bold": true,
+            "line_spacing": 1.5,
+            "alignment": "center"
+        },
+        "二级标题": {
+            "font": "宋体",
+            "size": "小四",
+            "bold": true,
+            "line_spacing": 1.25,
+            "alignment": "left"
+        },
+        "摘要页": {
+            "font": "宋体",
+            "size": "五号",
+            "bold": false,
+            "line_spacing": 1.5,
+            "alignment": "left"
+        },
+        "页码": {
+            "font": "Times New Roman",
+            "size": "五号",
+            "bold": false,
+            "line_spacing": 1.5,
+            "alignment": "left"
+        },
+        "关键词": {
+            "font": "宋体",
+            "size": "五号",
+            "bold": false,
+            "line_spacing": 1.5,
+            "alignment": "left"
+        },
+        "正文": {
+            "font": "宋体",
+            "size": "五号",
+            "bold": false,
+            "line_spacing": 1.25,
+            "alignment": "left"
+        },
+        "公式": {
+            "font": "宋体",
+            "size": "五号",
+            "bold": false,
+            "line_spacing": 1.5,
+            "alignment": "left"
+        },
+        "表格": {
+            "font": "宋体",
+            "size": "五号",
+            "bold": false,
+            "line_spacing": 1.5,
+            "alignment": "left"
+        },
+        "图片": {
+            "font": "宋体",
+            "size": "五号",
+            "bold": false,
+            "line_spacing": 1.5,
+            "alignment": "center"
+        },
+        "参考文献": {
+            "font": "宋体",
+            "size": "五号",
+            "bold": false,
+            "line_spacing": 1.5,
+            "alignment": "left"
+        },
+        "附录": {
+            "font": "宋体",
+            "size": "五号",
+            "bold": false,
+            "line_spacing": 1.5,
+            "alignment": "left"
+        }
+    }
+}

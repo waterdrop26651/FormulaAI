@@ -1,0 +1,23 @@
+{
+    "include": [
+        "src",
+        "tests",
+        "main.py",
+        "start.py"
+    ],
+    "exclude": [
+        ".venv",
+        "**/__pycache__",
+        "**/*.pyc",
+        "logs",
+        "config/templates",
+        ".git",
+        "node_modules",
+        "**/.DS_Store"
+    ],
+    "reportMissingImports": true,
+    "reportMissingTypeStubs": false,
+    "pythonVersion": "3.12",
+    "typeCheckingMode": "basic",
+    "useLibraryCodeForTypes": true
+}
