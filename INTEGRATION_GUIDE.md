@@ -1,47 +1,49 @@
-# FormulaAI 项目功能说明
+# FormulaAI Project Feature Documentation
 
-## 项目概述
+## Project Overview
 
-FormulaAI 是一个基于 AI 技术的智能文档排版工具，专门解决将自然语言描述的格式要求转换为结构化排版规范的核心问题。本项目实现了从"文字描述"到"自动排版"的完整技术链路。
+FormulaAI is an AI-powered intelligent document formatting tool that specifically addresses the core challenge of converting natural language format requirements into structured formatting specifications. This project implements a complete technical pipeline from "textual description" to "automated formatting".
 
-### 核心价值
-- **AI 理解能力**：深度理解自然语言格式描述，准确解析用户意图
-- **智能结构分析**：自动识别文档结构，区分标题、正文、列表等元素
-- **精确格式转换**：将抽象描述转换为具体的字体、间距、对齐等排版参数
-- **模板化管理**：支持预设模板库和用户自定义模板，提高排版效率
+### Core Value
+- **AI Understanding Capability**: Deep understanding of natural language format descriptions with accurate parsing of user intent
+- **Intelligent Structure Analysis**: Automatic document structure recognition, distinguishing titles, body text, lists and other elements
+- **Precise Format Conversion**: Converting abstract descriptions into specific formatting parameters such as fonts, spacing, alignment
+- **Template Management**: Supporting preset template libraries and user-defined templates to improve formatting efficiency
 
-## 功能架构
+## Feature Architecture
 
-### 核心功能模块
+### Core Functional Modules
 ```
 ┌─────────────────────────────────────────────────────────┐
-│                   FormulaAI 核心功能                    │
+│                   FormulaAI Core Features               │
 ├─────────────────────────────────────────────────────────┤
-│                    用户交互层                           │
+│                    User Interface Layer                 │
 │  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐    │
-│  │  文档上传    │  │  格式描述    │  │  模板选择    │    │
+│  │ Doc Upload  │  │Format Desc. │  │Template Sel.│    │
 │  └─────────────┘  └─────────────┘  └─────────────┘    │
 ├─────────────────────────────────────────────────────────┤
-│                   AI 处理层                             │
+│                   AI Processing Layer                   │
 │  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐    │
-│  │  语言理解    │  │  结构识别    │  │  规则生成    │    │
+│  │Language     │  │Structure    │  │Rule         │    │
+│  │Understanding│  │Recognition  │  │Generation   │    │
 │  └─────────────┘  └─────────────┘  └─────────────┘    │
 ├─────────────────────────────────────────────────────────┤
-│                   文档处理层                            │
+│                   Document Processing Layer             │
 │  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐    │
-│  │  格式应用    │  │  样式调整    │  │  文档输出    │    │
+│  │Format       │  │Style        │  │Document     │    │
+│  │Application  │  │Adjustment   │  │Output       │    │
 │  └─────────────┘  └─────────────┘  └─────────────┘    │
 └─────────────────────────────────────────────────────────┘
 ```
 
-### 功能模块详解
+### Detailed Module Description
 
-#### 1. 自然语言理解模块 (ai_connector.py)
-**核心技术架构**：
-- **AI模型接入**：支持DeepSeek、OpenAI、Claude等多种大语言模型
-- **提示词工程**：精心设计的提示词模板，确保AI理解准确性
-- **响应解析**：智能解析AI返回的JSON格式排版规则
-- **错误处理**：自动重试机制和优雅降级策略
+#### 1. Natural Language Understanding Module (ai_connector.py)
+**Core Technical Architecture**:
+- **AI Model Integration**: Support for multiple large language models including DeepSeek, OpenAI, Claude
+- **Prompt Engineering**: Carefully designed prompt templates ensuring AI understanding accuracy
+- **Response Parsing**: Intelligent parsing of JSON-formatted formatting rules returned by AI
+- **Error Handling**: Automatic retry mechanisms and graceful degradation strategies
 
 **技术实现细节**：
 ```python

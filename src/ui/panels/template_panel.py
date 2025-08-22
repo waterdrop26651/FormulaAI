@@ -156,9 +156,9 @@ class TemplatePanel(QWidget):
         self.import_btn.clicked.connect(self._import_template)
         
         # 页眉页脚配置按钮
-        self.header_footer_btn = QPushButton("页眉页脚设置")
+        self.header_footer_btn = QPushButton("Header & Footer Settings")
         self.header_footer_btn.clicked.connect(self._show_header_footer_dialog)
-        self.header_footer_btn.setToolTip("配置文档的页眉页脚")
+        self.header_footer_btn.setToolTip("Configure document header and footer")
         
         layout.addWidget(self.import_btn)
         layout.addWidget(self.header_footer_btn)
@@ -384,12 +384,12 @@ class TemplatePanel(QWidget):
             dialog = HeaderFooterDialog(self, self.header_footer_config)
             if dialog.exec():
                 self.header_footer_config = dialog.config
-                app_logger.info("页眉页脚配置已更新")
-                QMessageBox.information(self, "成功", "页眉页脚配置已保存")
+                app_logger.info("Header/footer configuration updated")
+                QMessageBox.information(self, "Success", "Header and footer configuration saved")
                 
         except Exception as e:
-            app_logger.error(f"打开页眉页脚配置失败: {e}")
-            QMessageBox.warning(self, "错误", f"打开页眉页脚配置失败: {str(e)}")
+            app_logger.error(f"Failed to open header/footer configuration: {e}")
+            QMessageBox.warning(self, "Error", f"Failed to open header/footer configuration: {str(e)}")
     
     # 公共接口方法
     def get_selected_template(self) -> Optional[str]:
