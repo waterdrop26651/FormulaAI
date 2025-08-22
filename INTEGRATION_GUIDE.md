@@ -45,7 +45,9 @@ FormulaAI is an AI-powered intelligent document formatting tool that specificall
 - **Response Parsing**: Intelligent parsing of JSON-formatted formatting rules returned by AI
 - **Error Handling**: Automatic retry mechanisms and graceful degradation strategies
 
-**技术实现细节**：
+
+**Technical Implementation Details**:
+
 ```python
 class AIConnector:
     def __init__(self, api_config):
@@ -55,37 +57,41 @@ class AIConnector:
         self.timeout = api_config.get('timeout', 300)
     
     def parse_format_description(self, description, context=None):
-        # 构建提示词
+        # Build the prompt
         prompt = self._build_prompt(description, context)
-        # 调用AI API
+        # Call the AI API
         response = self._call_ai_api(prompt)
-        # 解析响应
+        # Parse the response
         return self._parse_response(response)
 ```
 
-**性能优化**：
-- 响应缓存：相似请求复用结果，减少API调用
-- 批处理支持：多个格式描述批量处理
-- 超时控制：可配置的请求超时时间
+**Performance Optimization**:
 
-#### 2. 文档结构识别模块 (structure_analyzer.py)
-**核心算法**：
-- **多维特征分析**：结合字体、字号、样式、缩进、间距等特征
-- **语义内容分析**：基于文本内容识别标题、正文、列表等元素
-- **层次关系构建**：自动构建文档的树形结构
-- **机器学习增强**：使用训练好的模型提高识别准确率
+  - Response Caching: Reuse results for similar requests to reduce API calls.
+  - Batch Processing Support: Process multiple format descriptions in batches.
+  - Timeout Control: Configurable request timeout.
 
-**技术实现细节**：
+#### 2\. Document Structure Recognition Module (structure\_analyzer.py)
+
+**Core Algorithms**:
+
+  - **Multi-dimensional Feature Analysis**: Combines features like font, font size, style, indentation, and spacing.
+  - **Semantic Content Analysis**: Identifies elements like titles, body text, and lists based on text content.
+  - **Hierarchical Relationship Construction**: Automatically builds a tree-like structure of the document.
+  - **Machine Learning Enhancement**: Uses a pre-trained model to improve recognition accuracy.
+
+**Technical Implementation Details**:
+
 ```python
 class StructureAnalyzer:
     def analyze_document(self, doc_path):
-        # 读取文档
+        # Read the document
         document = Document(doc_path)
-        # 提取段落特征
+        # Extract paragraph features
         paragraphs = self._extract_paragraph_features(document)
-        # 分类段落类型
+        # Classify paragraph types
         classified = self._classify_paragraphs(paragraphs)
-        # 构建层次结构
+        # Build the hierarchical structure
         structure = self._build_hierarchy(classified)
         return structure
     
@@ -104,19 +110,23 @@ class StructureAnalyzer:
         return features
 ```
 
-**识别准确率**：
-- 标题识别：95%以上准确率
-- 段落分类：90%以上准确率
-- 列表识别：85%以上准确率
+**Recognition Accuracy**:
 
-#### 3. 排版规则生成模块 (format_manager.py)
-**规则引擎架构**：
-- **规则模板系统**：预定义的排版规则模板
-- **参数映射机制**：自然语言参数到Word格式参数的映射
-- **继承关系处理**：处理父子级格式的继承和覆盖
-- **冲突解决策略**：处理格式规则之间的冲突
+  - Title Recognition: Over 95% accuracy
+  - Paragraph Classification: Over 90% accuracy
+  - List Recognition: Over 85% accuracy
 
-**技术实现细节**：
+#### 3\. Formatting Rule Generation Module (format\_manager.py)
+
+**Rule Engine Architecture**:
+
+  - **Rule Template System**: Pre-defined formatting rule templates.
+  - **Parameter Mapping Mechanism**: Maps natural language parameters to Word formatting parameters.
+  - **Inheritance Handling**: Manages inheritance and overriding of formats between parent and child levels.
+  - **Conflict Resolution Strategy**: Resolves conflicts between formatting rules.
+
+**Technical Implementation Details**:
+
 ```python
 class FormatManager:
     def __init__(self):
@@ -124,11 +134,11 @@ class FormatManager:
         self.font_mapping = self._load_font_mapping()
     
     def generate_format_rules(self, ai_response, document_structure):
-        # 解析AI响应
+        # Parse AI response
         parsed_rules = self._parse_ai_response(ai_response)
-        # 应用规则模板
+        # Apply rule templates
         formatted_rules = self._apply_rule_templates(parsed_rules)
-        # 处理继承关系
+        # Process inheritance relationships
         final_rules = self._process_inheritance(formatted_rules, document_structure)
         return final_rules
     
@@ -140,19 +150,23 @@ class FormatManager:
         return formatted
 ```
 
-**支持的格式参数**：
-- 字体：字体族、字号、颜色、样式（粗体、斜体、下划线）
-- 段落：对齐方式、行间距、段前段后间距、首行缩进
-- 页面：页边距、页眉页脚、页码设置
+**Supported Formatting Parameters**:
 
-#### 4. 模板管理模块 (template_manager.py)
-**模板系统架构**：
-- **JSON格式存储**：使用JSON格式存储模板配置
-- **版本控制**：支持模板版本管理和回滚
-- **分类管理**：按文档类型和行业分类管理模板
-- **权限控制**：支持个人模板和团队共享模板
+  - Font: Font family, size, color, style (bold, italic, underline)
+  - Paragraph: Alignment, line spacing, spacing before/after, first-line indent
+  - Page: Margins, header/footer, page number settings
 
-**技术实现细节**：
+#### 4\. Template Management Module (template\_manager.py)
+
+**Template System Architecture**:
+
+  - **JSON Format Storage**: Uses JSON to store template configurations.
+  - **Version Control**: Supports template version management and rollback.
+  - **Categorized Management**: Manages templates by document type and industry.
+  - **Permission Control**: Supports personal and team-shared templates.
+
+**Technical Implementation Details**:
+
 ```python
 class TemplateManager:
     def __init__(self, template_dir):
@@ -176,153 +190,177 @@ class TemplateManager:
     def list_templates(self, category=None):
         if category:
             return [t for t in self.templates.values() 
-                   if t.get('metadata', {}).get('category') == category]
+                    if t.get('metadata', {}).get('category') == category]
         return list(self.templates.values())
 ```
 
-**模板结构示例**：
+**Template Structure Example**:
+
 ```json
 {
-  "name": "学术论文模板",
+  "name": "Academic Paper Template",
   "version": "1.0",
   "category": "academic",
   "rules": {
     "title": {
-      "font": "黑体",
+      "font": "SimHei",
       "size": 18,
       "alignment": "center",
       "bold": true
     },
     "heading1": {
-      "font": "黑体",
+      "font": "SimHei",
       "size": 16,
       "alignment": "left",
       "bold": true
     },
     "body": {
-      "font": "宋体",
+      "font": "SimSun",
       "size": 12,
       "alignment": "justify",
-      "indent": "2字符",
+      "indent": "2 characters",
       "line_spacing": 1.5
     }
   }
 }
 ```
 
-## 核心功能展示
+## Core Feature Showcase
 
-### 1. 智能格式解析
-**输入示例**：
+### 1\. Intelligent Format Parsing
+
+**Input Example**:
+
 ```
-用户描述："论文标题用黑体18号居中，一级标题用黑体16号左对齐，
-正文用宋体12号两端对齐首行缩进2字符，行间距1.5倍，
-参考文献用宋体10号悬挂缩进"
+User description: "Paper title in 18pt SimHei centered, level 1 heading in 16pt SimHei left-aligned,
+body text in 12pt SimSun justified with a 2-character first-line indent and 1.5 line spacing,
+references in 10pt SimSun with a hanging indent."
 ```
 
-**AI理解结果**：
-- 自动识别5种不同的格式要求
-- 准确解析字体、字号、对齐、缩进、间距等参数
-- 建立格式层次关系和应用规则
-- 生成完整的排版规范
+**AI Understanding Result**:
 
-### 2. 文档结构智能识别
-**识别能力**：
-- **标题层次**：自动识别多级标题结构（1-6级）
-- **段落类型**：区分正文、引用、注释、说明等
-- **特殊元素**：识别列表、表格、图片、公式、代码块
-- **格式继承**：理解父子级格式关系和继承规则
+  - Automatically identifies 5 different formatting requirements.
+  - Accurately parses parameters like font, size, alignment, indentation, and spacing.
+  - Establishes a formatting hierarchy and application rules.
+  - Generates a complete set of formatting specifications.
 
-### 3. 一键智能排版
-**处理流程**：
-1. **文档上传** → 支持.docx格式，自动检测编码
-2. **智能分析** → AI理解格式要求，识别文档结构
-3. **规则生成** → 转换为精确的排版参数和样式规则
-4. **格式应用** → 批量应用到整个文档，保持一致性
-5. **质量检查** → 自动验证格式正确性，提供优化建议
-6. **结果输出** → 生成标准化的格式化文档
+### 2\. Intelligent Document Structure Recognition
 
-### 4. 模板化管理
-**内置模板库**：
-- 学术论文（IEEE、ACM、中文期刊等标准）
-- 商务报告（年报、提案、分析报告等）
-- 技术文档（API文档、用户手册、规范文档等）
-- 政府公文（通知、报告、函件等标准格式）
+**Recognition Capabilities**:
 
-**自定义功能**：
-- 可视化模板编辑器
-- 格式预览和实时调整
-- 模板版本管理和回滚
-- 团队模板库共享
+  - **Heading Levels**: Automatically recognizes multi-level heading structures (Levels 1-6).
+  - **Paragraph Types**: Differentiates between body text, quotes, notes, captions, etc.
+  - **Special Elements**: Identifies lists, tables, images, formulas, and code blocks.
+  - **Format Inheritance**: Understands parent-child format relationships and inheritance rules.
 
-## 应用场景
+### 3\. One-Click Intelligent Formatting
 
-### 1. 学术写作场景
-**典型需求**：
-- 论文格式标准化（IEEE、ACM、中文期刊等）
-- 多级标题层次管理
-- 参考文献格式统一
-- 图表标题和编号规范
+**Processing Flow**:
 
-**FormulaAI解决方案**：
-- 一键应用期刊模板
-- 智能识别论文结构
-- 自动调整格式细节
-- 确保格式规范性
+1.  **Document Upload** -\> Supports .docx format, auto-detects encoding.
+2.  **Intelligent Analysis** -\> AI understands formatting requirements and recognizes document structure.
+3.  **Rule Generation** -\> Converts requirements into precise formatting parameters and style rules.
+4.  **Format Application** -\> Applies rules to the entire document in bulk for consistency.
+5.  **Quality Check** -\> Automatically validates format correctness and provides optimization suggestions.
+6.  **Result Output** -\> Generates a standardized, formatted document.
 
-### 2. 企业文档场景
-**典型需求**：
-- 商务报告格式统一
-- 公司文档标准化
-- 多人协作格式一致性
-- 品牌形象规范化
+### 4\. Templated Management
 
-**FormulaAI解决方案**：
-- 企业模板库管理
-- 批量文档格式化
-- 团队模板共享
-- 品牌标准自动应用
+**Built-in Template Library**:
 
-### 3. 政府公文场景
-**典型需求**：
-- 公文格式严格标准
-- 层级标题规范化
-- 版式要求精确
-- 批量处理效率
+  - Academic Papers (IEEE, ACM, Chinese journals standards, etc.)
+  - Business Reports (Annual reports, proposals, analysis reports, etc.)
+  - Technical Documents (API documentation, user manuals, specifications, etc.)
+  - Government Official Documents (Notices, reports, letters in standard formats, etc.)
 
-**FormulaAI解决方案**：
-- 公文标准模板
-- 精确格式控制
-- 自动版式调整
-- 高效批量处理
+**Customization Features**:
 
-### 4. 技术文档场景
-**典型需求**：
-- API文档格式统一
-- 代码示例格式化
-- 多版本文档管理
-- 在线文档生成
+  - Visual template editor.
+  - Format preview and real-time adjustments.
+  - Template version management and rollback.
+  - Shared team template library.
 
-**FormulaAI解决方案**：
-- 技术文档模板
-- 代码块智能识别
-- 版本格式继承
-- 标准化输出
+## Application Scenarios
 
-## API接口设计
+### 1\. Academic Writing Scenarios
 
-### RESTful API架构
+**Typical Needs**:
 
-#### 1. 文档处理接口
+  - Standardization of paper formats (IEEE, ACM, Chinese journals, etc.).
+  - Management of multi-level heading hierarchies.
+  - Unification of reference formats.
+  - Standardization of figure and table captions and numbering.
+
+**FormulaAI Solution**:
+
+  - One-click application of journal templates.
+  - Intelligent recognition of paper structure.
+  - Automatic adjustment of formatting details.
+  - Ensures compliance with formatting standards.
+
+### 2\. Corporate Document Scenarios
+
+**Typical Needs**:
+
+  - Uniform formatting for business reports.
+  - Standardization of company documents.
+  - Consistency in formatting for multi-person collaboration.
+  - Standardization of brand image.
+
+**FormulaAI Solution**:
+
+  - Corporate template library management.
+  - Batch formatting of documents.
+  - Team template sharing.
+  - Automatic application of brand standards.
+
+### 3\. Government Official Document Scenarios
+
+**Typical Needs**:
+
+  - Strict standards for official document formats.
+  - Standardization of hierarchical headings.
+  - Precise layout requirements.
+  - Efficiency in batch processing.
+
+**FormulaAI Solution**:
+
+  - Standard templates for official documents.
+  - Precise format control.
+  - Automatic layout adjustments.
+  - Efficient batch processing.
+
+### 4\. Technical Documentation Scenarios
+
+**Typical Needs**:
+
+  - Uniform formatting for API documentation.
+  - Formatting for code examples.
+  - Management of multi-version documents.
+  - Generation of online documentation.
+
+**FormulaAI Solution**:
+
+  - Technical documentation templates.
+  - Intelligent recognition of code blocks.
+  - Version-based format inheritance.
+  - Standardized output.
+
+## API Interface Design
+
+### RESTful API Architecture
+
+#### 1\. Document Processing Interface
+
 ```http
 POST /api/v1/documents/process
 Content-Type: multipart/form-data
 
 Parameters:
-- file: 上传的文档文件 (required)
-- template: 模板名称 (optional)
-- format_description: 格式描述文本 (optional)
-- options: 处理选项JSON (optional)
+- file: Uploaded document file (required)
+- template: Template name (optional)
+- format_description: Text description of the format (optional)
+- options: JSON object for processing options (optional)
 
 Response:
 {
@@ -335,15 +373,16 @@ Response:
 }
 ```
 
-#### 2. 格式解析接口
+#### 2\. Format Parsing Interface
+
 ```http
 POST /api/v1/formats/parse
 Content-Type: application/json
 
 {
-    "description": "标题使用黑体18号字居中，正文宋体12号字两端对齐",
+    "description": "Title in 18pt SimHei centered, body text in 12pt SimSun justified",
     "context": "academic_paper",
-    "language": "zh-CN"
+    "language": "en-US"
 }
 
 Response:
@@ -351,13 +390,13 @@ Response:
     "success": true,
     "rules": {
         "title": {
-            "font": "黑体",
+            "font": "SimHei",
             "size": 18,
             "alignment": "center",
             "bold": true
         },
         "body": {
-            "font": "宋体",
+            "font": "SimSun",
             "size": 12,
             "alignment": "justify"
         }
@@ -366,31 +405,33 @@ Response:
 }
 ```
 
-#### 3. 模板管理接口
+#### 3\. Template Management Interface
+
 ```http
-# 获取模板列表
+# Get a list of templates
 GET /api/v1/templates?category=academic&page=1&limit=10
 
-# 获取特定模板
+# Get a specific template
 GET /api/v1/templates/{template_id}
 
-# 创建新模板
+# Create a new template
 POST /api/v1/templates
 {
-    "name": "自定义学术模板",
+    "name": "Custom Academic Template",
     "category": "academic",
     "rules": {...},
     "metadata": {...}
 }
 
-# 更新模板
+# Update a template
 PUT /api/v1/templates/{template_id}
 
-# 删除模板
+# Delete a template
 DELETE /api/v1/templates/{template_id}
 ```
 
-#### 4. 任务状态查询接口
+#### 4\. Task Status Query Interface
+
 ```http
 GET /api/v1/documents/{document_id}/status
 
@@ -408,17 +449,18 @@ Response:
 }
 ```
 
-## 部署配置
+## Deployment Configuration
 
-### 环境要求
+### Environment Requirements
+
 ```yaml
-# 系统要求
+# System Requirements
 operating_system: Linux/macOS/Windows
 python_version: ">=3.8"
 memory: ">=4GB"
 storage: ">=10GB"
 
-# 依赖包
+# Dependencies
 dependencies:
   - python-docx>=0.8.11
   - PyQt6>=6.4.0
@@ -430,44 +472,46 @@ dependencies:
   - uvicorn>=0.15.0
 ```
 
-### Docker部署
+### Docker Deployment
+
 ```dockerfile
 # Dockerfile
 FROM python:3.9-slim
 
-# 设置工作目录
+# Set working directory
 WORKDIR /app
 
-# 安装系统依赖
+# Install system dependencies (e.g., Chinese fonts)
 RUN apt-get update && apt-get install -y \
     fonts-wqy-microhei \
     fonts-wqy-zenhei \
     && rm -rf /var/lib/apt/lists/*
 
-# 复制依赖文件
+# Copy dependency file
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# 复制源代码
+# Copy source code
 COPY src/ ./src/
 COPY config/ ./config/
 COPY templates/ ./templates/
 
-# 创建必要目录
+# Create necessary directories
 RUN mkdir -p /app/logs /app/output /app/temp
 
-# 设置环境变量
+# Set environment variables
 ENV PYTHONPATH=/app
 ENV FORMULAAI_CONFIG_DIR=/app/config
 
-# 暴露端口
+# Expose port
 EXPOSE 8000
 
-# 启动命令
+# Start command
 CMD ["python", "-m", "uvicorn", "src.api.main:app", "--host", "0.0.0.0", "--port", "8000"]
 ```
 
-### 配置文件管理
+### Configuration File Management
+
 ```json
 // config/api_config.json
 {
@@ -522,28 +566,29 @@ CMD ["python", "-m", "uvicorn", "src.api.main:app", "--host", "0.0.0.0", "--port
 }
 ```
 
-## 性能优化
+## Performance Optimization
 
-### 1. 缓存策略
+### 1\. Caching Strategy
+
 ```python
-# 多层缓存架构
+# Multi-layer cache architecture
 class CacheManager:
     def __init__(self):
-        self.memory_cache = LRUCache(maxsize=1000)  # 内存缓存
-        self.redis_cache = RedisCache()  # 分布式缓存
-        self.file_cache = FileCache()  # 文件缓存
+        self.memory_cache = LRUCache(maxsize=1000)  # In-memory cache
+        self.redis_cache = RedisCache()             # Distributed cache
+        self.file_cache = FileCache()               # File cache
     
     def get_ai_response(self, prompt_hash):
-        # 1. 内存缓存
+        # 1. Memory cache
         if result := self.memory_cache.get(prompt_hash):
             return result
         
-        # 2. Redis缓存
+        # 2. Redis cache
         if result := self.redis_cache.get(prompt_hash):
             self.memory_cache.set(prompt_hash, result)
             return result
         
-        # 3. 文件缓存
+        # 3. File cache
         if result := self.file_cache.get(prompt_hash):
             self.redis_cache.set(prompt_hash, result, ttl=3600)
             self.memory_cache.set(prompt_hash, result)
@@ -552,9 +597,10 @@ class CacheManager:
         return None
 ```
 
-### 2. 异步处理架构
+### 2\. Asynchronous Processing Architecture
+
 ```python
-# 异步任务处理
+# Asynchronous task processing
 from celery import Celery
 
 app = Celery('formulaai')
@@ -562,20 +608,20 @@ app = Celery('formulaai')
 @app.task(bind=True)
 def process_document_async(self, document_path, format_description, template_name):
     try:
-        # 更新任务状态
+        # Update task state
         self.update_state(state='PROGRESS', meta={'progress': 10})
         
-        # 文档结构分析
+        # Document structure analysis
         analyzer = StructureAnalyzer()
         structure = analyzer.analyze_document(document_path)
         self.update_state(state='PROGRESS', meta={'progress': 30})
         
-        # AI格式解析
+        # AI format parsing
         ai_connector = AIConnector()
         format_rules = ai_connector.parse_format_description(format_description)
         self.update_state(state='PROGRESS', meta={'progress': 60})
         
-        # 应用格式
+        # Apply formatting
         processor = DocumentProcessor()
         result_path = processor.apply_formatting(document_path, format_rules, structure)
         self.update_state(state='PROGRESS', meta={'progress': 100})
@@ -587,9 +633,10 @@ def process_document_async(self, document_path, format_description, template_nam
         raise
 ```
 
-### 3. 内存管理优化
+### 3\. Memory Management Optimization
+
 ```python
-# 大文档分块处理
+# Chunk-based processing for large documents
 class DocumentProcessor:
     def __init__(self, batch_size=20):
         self.batch_size = batch_size
@@ -598,22 +645,23 @@ class DocumentProcessor:
         document = Document(document_path)
         total_paragraphs = len(document.paragraphs)
         
-        # 分批处理段落
+        # Process paragraphs in batches
         for i in range(0, total_paragraphs, self.batch_size):
             batch = document.paragraphs[i:i + self.batch_size]
             self._process_paragraph_batch(batch, format_rules)
             
-            # 强制垃圾回收
+            # Force garbage collection
             gc.collect()
             
-            # 更新进度
+            # Update progress
             progress = min(100, (i + self.batch_size) * 100 // total_paragraphs)
             self._update_progress(progress)
 ```
 
-### 4. 并发处理优化
+### 4\. Concurrency Processing Optimization
+
 ```python
-# 多文档并行处理
+# Parallel processing of multiple documents
 import asyncio
 from concurrent.futures import ThreadPoolExecutor
 
@@ -624,7 +672,7 @@ class BatchProcessor:
     async def process_multiple_documents(self, document_tasks):
         loop = asyncio.get_event_loop()
         
-        # 创建异步任务
+        # Create asynchronous tasks
         tasks = []
         for task in document_tasks:
             future = loop.run_in_executor(
@@ -636,42 +684,47 @@ class BatchProcessor:
             )
             tasks.append(future)
         
-        # 等待所有任务完成
+        # Wait for all tasks to complete
         results = await asyncio.gather(*tasks, return_exceptions=True)
         return results
 ```
 
-## 技术优势
+## Technical Advantages
 
-### 1. AI理解能力
-- **多模型支持**：集成多种大语言模型，确保理解准确性
-- **提示词优化**：经过大量测试优化的提示词模板
-- **上下文感知**：根据文档类型和领域调整理解策略
-- **错误自愈**：智能检测和修正AI理解错误
+### 1\. AI Understanding Capabilities
 
-### 2. 处理精度
-- **像素级控制**：精确到0.1磅的字体大小控制
-- **全格式支持**：支持Word文档的所有格式属性
-- **层次一致性**：确保多级标题的格式继承关系
-- **质量验证**：多层验证机制确保输出质量
+  - **Multi-model Support**: Integrates various large language models to ensure understanding accuracy.
+  - **Prompt Optimization**: Utilizes prompt templates optimized through extensive testing.
+  - **Context-aware**: Adjusts understanding strategy based on document type and domain.
+  - **Error Self-correction**: Intelligently detects and corrects AI understanding errors.
 
-### 3. 性能表现
-- **高速处理**：优化算法，单文档平均处理时间15-30秒
-- **高并发**：支持多文档并行处理，提升整体吞吐量
-- **内存安全**：智能内存管理，支持大文档处理
-- **高可用性**：99.9%的服务可用性，自动故障恢复
+### 2\. Processing Precision
 
-### 4. 扩展能力
-- **插件架构**：支持第三方插件扩展功能
-- **API开放**：完整的RESTful API，便于集成
-- **多语言支持**：支持中英文等多种语言的格式描述
-- **云原生**：支持容器化部署和微服务架构
+  - **Pixel-level Control**: Precise font size control down to 0.1 points.
+  - **Full Format Support**: Supports all formatting attributes of Word documents.
+  - **Hierarchical Consistency**: Ensures format inheritance for multi-level headings.
+  - **Quality Validation**: Multi-layer validation mechanism ensures output quality.
 
-## 安全考虑
+### 3\. Performance
 
-### 1. API安全
+  - **High-speed Processing**: Optimized algorithms; average processing time of 15-30 seconds per document.
+  - **High Concurrency**: Supports parallel processing of multiple documents to increase overall throughput.
+  - **Memory Safe**: Intelligent memory management supports large document processing.
+  - **High Availability**: 99.9% service availability with automatic fault recovery.
+
+### 4\. Extensibility
+
+  - **Plugin Architecture**: Supports third-party plugins to extend functionality.
+  - **Open API**: Provides a complete RESTful API for easy integration.
+  - **Multi-language Support**: Supports format descriptions in languages like Chinese and English.
+  - **Cloud-native**: Supports containerized deployment and microservices architecture.
+
+## Security Considerations
+
+### 1\. API Security
+
 ```python
-# JWT认证中间件
+# JWT authentication middleware
 from fastapi import HTTPException, Depends
 from fastapi.security import HTTPBearer
 
@@ -687,7 +740,7 @@ def verify_token(token: str = Depends(security)):
     except JWTError:
         raise HTTPException(status_code=401, detail="Invalid token")
 
-# API限流
+# API rate limiting
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
 
@@ -698,13 +751,14 @@ app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 @app.post("/api/v1/documents/process")
 @limiter.limit("10/minute")
 async def process_document(request: Request, user_id: str = Depends(verify_token)):
-    # 处理逻辑
+    # Processing logic
     pass
 ```
 
-### 2. 数据安全
+### 2\. Data Security
+
 ```python
-# 文件加密存储
+# Encrypted file storage
 from cryptography.fernet import Fernet
 
 class SecureFileManager:
@@ -721,7 +775,7 @@ class SecureFileManager:
             encrypted_content = f.read()
         return self.cipher.decrypt(encrypted_content)
 
-# 敏感信息脱敏
+# Sensitive information masking
 def sanitize_log_data(data):
     sensitive_fields = ['api_key', 'password', 'token']
     for field in sensitive_fields:
@@ -730,9 +784,10 @@ def sanitize_log_data(data):
     return data
 ```
 
-### 3. 输入验证
+### 3\. Input Validation
+
 ```python
-# 文件类型验证
+# File type validation
 from magic import Magic
 
 def validate_file_type(file_path):
@@ -746,38 +801,39 @@ def validate_file_type(file_path):
     if file_type not in allowed_types:
         raise ValueError(f"Unsupported file type: {file_type}")
 
-# 内容安全检查
+# Content security check
 def validate_format_description(description):
-    # 检查长度限制
+    # Check length limit
     if len(description) > 10000:
         raise ValueError("Format description too long")
     
-    # 检查恶意内容
+    # Check for malicious content
     dangerous_patterns = ['<script>', 'javascript:', 'eval(', 'exec(']
     for pattern in dangerous_patterns:
         if pattern.lower() in description.lower():
             raise ValueError("Potentially dangerous content detected")
 ```
 
-## 监控和日志
+## Monitoring and Logging
 
-### 1. 性能监控
+### 1\. Performance Monitoring
+
 ```python
-# Prometheus指标收集
+# Prometheus metrics collection
 from prometheus_client import Counter, Histogram, Gauge
 
-# 定义指标
+# Define metrics
 REQUEST_COUNT = Counter('formulaai_requests_total', 'Total requests', ['method', 'endpoint'])
 REQUEST_DURATION = Histogram('formulaai_request_duration_seconds', 'Request duration')
 ACTIVE_TASKS = Gauge('formulaai_active_tasks', 'Number of active processing tasks')
 ERROR_COUNT = Counter('formulaai_errors_total', 'Total errors', ['error_type'])
 
-# 中间件
+# Middleware
 @app.middleware("http")
 async def monitor_requests(request: Request, call_next):
     start_time = time.time()
     
-    # 增加请求计数
+    # Increment request count
     REQUEST_COUNT.labels(method=request.method, endpoint=request.url.path).inc()
     
     try:
@@ -787,13 +843,14 @@ async def monitor_requests(request: Request, call_next):
         ERROR_COUNT.labels(error_type=type(e).__name__).inc()
         raise
     finally:
-        # 记录请求时长
+        # Record request duration
         REQUEST_DURATION.observe(time.time() - start_time)
 ```
 
-### 2. 结构化日志
+### 2\. Structured Logging
+
 ```python
-# 结构化日志配置
+# Structured logging configuration
 import structlog
 
 structlog.configure(
@@ -816,19 +873,20 @@ structlog.configure(
 
 logger = structlog.get_logger()
 
-# 使用示例
+# Usage example
 logger.info(
     "Document processing started",
     document_id="doc_123456",
     user_id="user_789",
     file_size=1024000,
-    format_description="学术论文格式"
+    format_description="Academic paper format"
 )
 ```
 
-### 3. 健康检查
+### 3\. Health Check
+
 ```python
-# 健康检查端点
+# Health check endpoint
 @app.get("/health")
 async def health_check():
     checks = {
@@ -852,11 +910,12 @@ async def health_check():
     )
 ```
 
-## 测试策略
+## Testing Strategy
 
-### 1. 单元测试
+### 1\. Unit Testing
+
 ```python
-# 测试用例示例
+# Test case example
 import pytest
 from unittest.mock import Mock, patch
 
@@ -870,22 +929,22 @@ class TestAIConnector:
     
     @patch('requests.post')
     def test_parse_format_description_success(self, mock_post):
-        # 模拟API响应
+        # Mock API response
         mock_response = Mock()
         mock_response.json.return_value = {
             'choices': [{
                 'message': {
-                    'content': '{"title": {"font": "黑体", "size": 18}}'
+                    'content': '{"title": {"font": "SimHei", "size": 18}}'
                 }
             }]
         }
         mock_post.return_value = mock_response
         
-        # 执行测试
-        result = self.ai_connector.parse_format_description("标题用黑体18号")
+        # Execute test
+        result = self.ai_connector.parse_format_description("Title in 18pt SimHei")
         
-        # 验证结果
-        assert result['title']['font'] == '黑体'
+        # Assert results
+        assert result['title']['font'] == 'SimHei'
         assert result['title']['size'] == 18
     
     def test_parse_format_description_invalid_json(self):
@@ -896,38 +955,40 @@ class TestAIConnector:
                 self.ai_connector.parse_format_description("test")
 ```
 
-### 2. 集成测试
+### 2\. Integration Testing
+
 ```python
-# API集成测试
+# API integration test
 from fastapi.testclient import TestClient
 
 client = TestClient(app)
 
 def test_document_processing_workflow():
-    # 1. 上传文档
+    # 1. Upload document
     with open("test_document.docx", "rb") as f:
         response = client.post(
             "/api/v1/documents/process",
             files={"file": ("test.docx", f, "application/vnd.openxmlformats-officedocument.wordprocessingml.document")},
-            data={"format_description": "标题用黑体18号居中"}
+            data={"format_description": "Title in 18pt SimHei centered"}
         )
     
     assert response.status_code == 200
     document_id = response.json()["document_id"]
     
-    # 2. 查询处理状态
+    # 2. Query processing status
     status_response = client.get(f"/api/v1/documents/{document_id}/status")
     assert status_response.status_code == 200
     
-    # 3. 下载结果
+    # 3. Download result
     download_response = client.get(f"/api/v1/documents/{document_id}/download")
     assert download_response.status_code == 200
     assert download_response.headers["content-type"] == "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
 ```
 
-### 3. 性能测试
+### 3\. Performance Testing
+
 ```python
-# 负载测试
+# Load testing
 import asyncio
 import aiohttp
 import time
@@ -937,20 +998,20 @@ async def load_test():
         tasks = []
         start_time = time.time()
         
-        # 创建100个并发请求
+        # Create 100 concurrent requests
         for i in range(100):
             task = asyncio.create_task(
                 test_single_request(session, f"test_doc_{i}.docx")
             )
             tasks.append(task)
         
-        # 等待所有请求完成
+        # Wait for all requests to complete
         results = await asyncio.gather(*tasks, return_exceptions=True)
         
         end_time = time.time()
         duration = end_time - start_time
         
-        # 统计结果
+        # Collate results
         success_count = sum(1 for r in results if not isinstance(r, Exception))
         error_count = len(results) - success_count
         
@@ -962,64 +1023,68 @@ async def test_single_request(session, filename):
     with open(filename, 'rb') as f:
         data = aiohttp.FormData()
         data.add_field('file', f, filename=filename)
-        data.add_field('format_description', '标题用黑体18号')
+        data.add_field('format_description', 'Title in 18pt SimHei')
         
         async with session.post('http://localhost:8000/api/v1/documents/process', data=data) as response:
             return await response.json()
 ```
 
-## 功能限制与说明
+## Functional Limitations and Notes
 
-### 1. 文档格式支持
-- **当前支持**：Microsoft Word (.docx) 格式
-- **计划支持**：PDF、HTML、Markdown等格式
-- **不支持**：.doc（旧版Word）、纯文本等格式
-- **技术限制**：依赖python-docx库的功能范围
+### 1\. Document Format Support
 
-### 2. 自然语言理解范围
-- **支持语言**：中文、英文格式描述
-- **理解范围**：字体、字号、颜色、对齐、间距、缩进等常见排版要素
-- **复杂场景**：支持多层次格式描述和条件格式
-- **AI限制**：依赖大语言模型的理解能力，极其复杂的描述可能需要人工调整
+  - **Currently Supported**: Microsoft Word (.docx) format
+  - **Planned Support**: PDF, HTML, Markdown, etc.
+  - **Not Supported**: .doc (legacy Word), plain text, etc.
+  - **Technical Limitation**: Dependent on the functional scope of the python-docx library.
 
-### 3. 处理能力
-- **文档大小**：建议单个文档不超过50MB（可配置）
-- **页面数量**：建议不超过200页（可通过分块处理扩展）
-- **处理时间**：根据文档复杂度，通常在15秒到5分钟之间
-- **并发限制**：默认最大5个并发任务（可配置）
+### 2\. Scope of Natural Language Understanding
 
-### 4. 系统资源要求
-- **内存使用**：单个任务约需200-500MB内存
-- **CPU要求**：多核CPU可提升并发处理能力
-- **存储空间**：需要足够空间存储临时文件和缓存
-- **网络要求**：稳定的网络连接用于AI API调用
+  - **Supported Languages**: Chinese, English format descriptions.
+  - **Scope of Understanding**: Common formatting elements like font, size, color, alignment, spacing, indentation, etc.
+  - **Complex Scenarios**: Supports multi-level format descriptions and conditional formatting.
+  - **AI Limitations**: Relies on the understanding capabilities of large language models; extremely complex descriptions may require manual adjustment.
 
-## 项目特色
+### 3\. Processing Capacity
 
-### 1. 创新性
-- **首创技术**：自然语言到排版规则的AI转换
-- **智能识别**：基于内容语义的文档结构分析
-- **自适应处理**：根据文档特征自动调整处理策略
+  - **Document Size**: Recommended maximum of 50MB per document (configurable).
+  - **Page Count**: Recommended maximum of 200 pages (can be extended with chunk-based processing).
+  - **Processing Time**: Typically between 15 seconds and 5 minutes, depending on document complexity.
+  - **Concurrency Limit**: Default maximum of 5 concurrent tasks (configurable).
 
-### 2. 实用性
-- **即插即用**：无需复杂配置，开箱即用
-- **高效处理**：大幅提升文档格式化效率
-- **质量保证**：确保输出文档的专业性和一致性
+### 4\. System Resource Requirements
 
-### 3. 可扩展性
-- **模块化设计**：便于功能扩展和定制
-- **开放架构**：支持第三方插件和扩展
-- **标准接口**：提供标准化的API接口
+  - **Memory Usage**: A single task requires approximately 200-500MB of memory.
+  - **CPU Requirements**: Multi-core CPUs can improve concurrent processing capabilities.
+  - **Storage Space**: Sufficient space is needed for temporary files and cache.
+  - **Network Requirements**: A stable network connection is required for AI API calls.
 
-## 项目信息
+## Project Highlights
 
-- **项目名称**：FormulaAI - AI智能文档排版工具
-- **开发语言**：Python 3.8+
-- **核心技术**：AI自然语言处理、文档结构分析、自动排版
-- **项目地址**：https://github.com/waterdrop26651/FormulaAI
-- **开源协议**：MIT License
-- **维护状态**：持续开发和维护中
+### 1\. Innovation
 
----
+  - **Pioneering Technology**: AI-driven conversion of natural language to formatting rules.
+  - **Intelligent Recognition**: Content-semantic-based document structure analysis.
+  - **Adaptive Processing**: Automatically adjusts processing strategy based on document characteristics.
 
-*本文档专注于FormulaAI的功能特性说明，为产品集成提供参考。具体的技术实现和集成方案将根据实际需求进行定制开发。*
+### 2\. Practicality
+
+  - **Plug and Play**: Ready to use out of the box without complex configuration.
+  - **Efficient Processing**: Significantly improves the efficiency of document formatting.
+  - **Quality Assurance**: Ensures the professionalism and consistency of output documents.
+
+### 3\. Extensibility
+
+  - **Modular Design**: Facilitates functional extension and customization.
+  - **Open Architecture**: Supports third-party plugins and extensions.
+  - **Standard Interfaces**: Provides standardized API interfaces.
+
+## Project Information
+
+  - **Project Name**: FormulaAI - AI-Powered Intelligent Document Formatting Tool
+  - **Development Language**: Python 3.8+
+  - **Core Technologies**: AI Natural Language Processing, Document Structure Analysis, Automated Formatting
+  - **Project Address**: [https://github.com/waterdrop26651/FormulaAI](https://github.com/waterdrop26651/FormulaAI)
+  - **Open Source License**: MIT License
+  - **Maintenance Status**: Under continuous development and maintenance.
+
