@@ -1,0 +1,78 @@
+{
+    "name": "数学建模国赛",
+    "description": "全国大学生数学建模竞赛(CUMCM)论文格式要求",
+    "rules": {
+        "论文题目": {
+            "font": "黑体",
+            "size": "三号",
+            "bold": true,
+            "alignment": "居中"
+        },
+        "摘要标题": {
+            "font": "黑体",
+            "size": "小三",
+            "bold": true,
+            "alignment": "居中"
+        },
+        "摘要内容": {
+            "font": "宋体",
+            "size": "小四",
+            "bold": false,
+            "alignment": "两端对齐"
+        },
+        "关键词": {
+            "font": "宋体",
+            "size": "小四",
+            "bold": false,
+            "alignment": "左对齐"
+        },
+        "一级标题": {
+            "font": "黑体",
+            "size": "四号",
+            "bold": true,
+            "alignment": "居中"
+        },
+        "二级标题": {
+            "font": "黑体",
+            "size": "小四",
+            "bold": true,
+            "alignment": "左对齐"
+        },
+        "三级标题": {
+            "font": "宋体",
+            "size": "小四",
+            "bold": true,
+            "alignment": "左对齐"
+        },
+        "正文": {
+            "font": "宋体",
+            "size": "小四",
+            "bold": false,
+            "alignment": "两端对齐"
+        },
+        "公式": {
+            "font": "Times New Roman",
+            "size": "小四",
+            "bold": false,
+            "alignment": "居中"
+        },
+        "图表标题": {
+            "font": "宋体",
+            "size": "五号",
+            "bold": false,
+            "alignment": "居中"
+        },
+        "参考文献": {
+            "font": "宋体",
+            "size": "五号",
+            "bold": false,
+            "alignment": "左对齐"
+        },
+        "附录": {
+            "font": "宋体",
+            "size": "小四",
+            "bold": false,
+            "alignment": "两端对齐"
+        }
+    }
+}

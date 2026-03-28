@@ -1,0 +1,66 @@
+{
+    "name": "美赛MCM-ICM",
+    "description": "美国大学生数学建模竞赛(MCM/ICM)论文格式",
+    "rules": {
+        "论文标题": {
+            "font": "Arial",
+            "size": "三号",
+            "bold": true,
+            "alignment": "居中"
+        },
+        "摘要标题": {
+            "font": "Arial",
+            "size": "小三",
+            "bold": true,
+            "alignment": "居中"
+        },
+        "摘要内容": {
+            "font": "Times New Roman",
+            "size": "小四",
+            "bold": false,
+            "alignment": "两端对齐"
+        },
+        "关键词": {
+            "font": "Times New Roman",
+            "size": "小四",
+            "bold": false,
+            "alignment": "左对齐"
+        },
+        "一级标题": {
+            "font": "Arial",
+            "size": "四号",
+            "bold": true,
+            "alignment": "居中"
+        },
+        "二级标题": {
+            "font": "Arial",
+            "size": "小四",
+            "bold": true,
+            "alignment": "左对齐"
+        },
+        "三级标题": {
+            "font": "Arial",
+            "size": "小四",
+            "bold": true,
+            "alignment": "左对齐"
+        },
+        "正文": {
+            "font": "Times New Roman",
+            "size": "小四",
+            "bold": false,
+            "alignment": "两端对齐"
+        },
+        "图表标题": {
+            "font": "Times New Roman",
+            "size": "五号",
+            "bold": false,
+            "alignment": "居中"
+        },
+        "参考文献": {
+            "font": "Times New Roman",
+            "size": "五号",
+            "bold": false,
+            "alignment": "左对齐"
+        }
+    }
+}

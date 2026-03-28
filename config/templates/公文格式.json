@@ -1,0 +1,60 @@
+{
+    "name": "公文格式",
+    "description": "党政机关公文格式(GB/T 9704)",
+    "rules": {
+        "公文标题": {
+            "font": "方正小标宋简体",
+            "size": "二号",
+            "bold": false,
+            "alignment": "居中"
+        },
+        "主送机关": {
+            "font": "仿宋",
+            "size": "三号",
+            "bold": false,
+            "alignment": "左对齐"
+        },
+        "正文": {
+            "font": "仿宋",
+            "size": "三号",
+            "bold": false,
+            "alignment": "两端对齐"
+        },
+        "一级标题": {
+            "font": "黑体",
+            "size": "三号",
+            "bold": false,
+            "alignment": "左对齐"
+        },
+        "二级标题": {
+            "font": "楷体",
+            "size": "三号",
+            "bold": false,
+            "alignment": "左对齐"
+        },
+        "三级标题": {
+            "font": "仿宋",
+            "size": "三号",
+            "bold": true,
+            "alignment": "左对齐"
+        },
+        "附件说明": {
+            "font": "仿宋",
+            "size": "三号",
+            "bold": false,
+            "alignment": "左对齐"
+        },
+        "落款": {
+            "font": "仿宋",
+            "size": "三号",
+            "bold": false,
+            "alignment": "右对齐"
+        },
+        "成文日期": {
+            "font": "仿宋",
+            "size": "三号",
+            "bold": false,
+            "alignment": "右对齐"
+        }
+    }
+}

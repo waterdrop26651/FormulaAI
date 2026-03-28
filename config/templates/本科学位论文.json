@@ -1,0 +1,84 @@
+{
+    "name": "本科学位论文",
+    "description": "本科毕业论文通用格式规范",
+    "rules": {
+        "论文题目": {
+            "font": "黑体",
+            "size": "二号",
+            "bold": true,
+            "alignment": "居中"
+        },
+        "学院专业姓名": {
+            "font": "宋体",
+            "size": "四号",
+            "bold": false,
+            "alignment": "居中"
+        },
+        "摘要": {
+            "font": "宋体",
+            "size": "小四",
+            "bold": false,
+            "alignment": "两端对齐"
+        },
+        "关键词": {
+            "font": "宋体",
+            "size": "小四",
+            "bold": false,
+            "alignment": "左对齐"
+        },
+        "目录标题": {
+            "font": "黑体",
+            "size": "三号",
+            "bold": true,
+            "alignment": "居中"
+        },
+        "第一章标题": {
+            "font": "黑体",
+            "size": "小三",
+            "bold": true,
+            "alignment": "居中"
+        },
+        "一级标题": {
+            "font": "黑体",
+            "size": "四号",
+            "bold": true,
+            "alignment": "左对齐"
+        },
+        "二级标题": {
+            "font": "黑体",
+            "size": "小四",
+            "bold": true,
+            "alignment": "左对齐"
+        },
+        "三级标题": {
+            "font": "宋体",
+            "size": "小四",
+            "bold": true,
+            "alignment": "左对齐"
+        },
+        "正文": {
+            "font": "宋体",
+            "size": "小四",
+            "bold": false,
+            "alignment": "两端对齐"
+        },
+        "图表说明": {
+            "font": "宋体",
+            "size": "五号",
+            "bold": false,
+            "alignment": "居中"
+        },
+        "参考文献": {
+            "font": "宋体",
+            "size": "五号",
+            "bold": false,
+            "alignment": "左对齐"
+        },
+        "致谢": {
+            "font": "宋体",
+            "size": "小四",
+            "bold": false,
+            "alignment": "两端对齐"
+        }
+    }
+}

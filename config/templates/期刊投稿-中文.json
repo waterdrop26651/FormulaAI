@@ -1,0 +1,72 @@
+{
+    "name": "期刊投稿-中文",
+    "description": "中文科技期刊投稿通用格式",
+    "rules": {
+        "论文标题": {
+            "font": "黑体",
+            "size": "二号",
+            "bold": true,
+            "alignment": "居中"
+        },
+        "作者姓名": {
+            "font": "楷体",
+            "size": "小四",
+            "bold": false,
+            "alignment": "居中"
+        },
+        "作者单位": {
+            "font": "宋体",
+            "size": "小五",
+            "bold": false,
+            "alignment": "居中"
+        },
+        "摘要": {
+            "font": "楷体",
+            "size": "小五",
+            "bold": false,
+            "alignment": "两端对齐"
+        },
+        "关键词": {
+            "font": "楷体",
+            "size": "小五",
+            "bold": false,
+            "alignment": "左对齐"
+        },
+        "一级标题": {
+            "font": "黑体",
+            "size": "四号",
+            "bold": true,
+            "alignment": "左对齐"
+        },
+        "二级标题": {
+            "font": "黑体",
+            "size": "小四",
+            "bold": true,
+            "alignment": "左对齐"
+        },
+        "三级标题": {
+            "font": "宋体",
+            "size": "小四",
+            "bold": true,
+            "alignment": "左对齐"
+        },
+        "正文": {
+            "font": "宋体",
+            "size": "五号",
+            "bold": false,
+            "alignment": "两端对齐"
+        },
+        "图表标题": {
+            "font": "宋体",
+            "size": "小五",
+            "bold": false,
+            "alignment": "居中"
+        },
+        "参考文献": {
+            "font": "宋体",
+            "size": "小五",
+            "bold": false,
+            "alignment": "左对齐"
+        }
+    }
+}
