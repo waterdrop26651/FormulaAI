@@ -150,11 +150,8 @@ class DocProcessor:
                     except Exception as e:
                         app_logger.error(f"处理第 {i+1} 个元素时发生错误: {str(e)}")
                         # 继续处理下一个元素，不中断整个过程
-                
-                # 批次处理完成后，强制垃圾回收
-                import gc
-                gc.collect()
-                app_logger.debug(f"批次 {batch_start+1}-{batch_end} 处理完成，已执行垃圾回收")
+
+                app_logger.debug(f"批次 {batch_start+1}-{batch_end} 处理完成")
             
             # 生成输出文件名
             try:
@@ -253,23 +250,13 @@ class DocProcessor:
             app_logger.debug("成功应用段落格式")
             
             app_logger.debug(f"完成元素处理: {element_type}, 内容: {content[:20]}...")
-            
+
         except Exception as e:
             app_logger.error(f"处理元素时发生异常: {str(e)}")
             # 记录详细错误信息
             import traceback
             app_logger.error(f"异常详情: {traceback.format_exc()}")
             # 不抛出异常，继续处理下一个元素
-        finally:
-            # 清理局部变量，释放内存
-            try:
-                del paragraph, run
-            except:
-                pass
-            
-            # 强制垃圾回收，防止内存泄漏
-            import gc
-            gc.collect()
     
     def _apply_font(self, run, format_info):
         """

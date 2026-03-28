@@ -6,6 +6,12 @@ AI接口连接器模块
 
 import json
 import requests
+
+try:
+    import json5
+except ImportError:
+    json5 = None
+
 from ..utils.logger import app_logger
 
 class AIConnector:
@@ -273,126 +279,79 @@ class AIConnector:
     def _fix_json(self, json_str):
         """
         尝试修复JSON格式错误
-        
+
         Args:
             json_str: 需要修复的JSON字符串
-            
+
         Returns:
             str: 修复后的JSON字符串
         """
         app_logger.debug("开始修复JSON格式")
-        
-        # 修复1: 处理数组最后一个元素后的逗号问题
-        # 查找所有可能的数组结束位置
-        array_end_positions = []
-        i = 0
-        while i < len(json_str) - 1:
-            if json_str[i:i+2] == "},":
-                # 往后找到下一个非空白字符
-                j = i + 2
-                while j < len(json_str) and json_str[j].isspace():
-                    j += 1
-                
-                # 如果下一个非空白字符是右方括号，则可能是数组结束
-                if j < len(json_str) and json_str[j] == "]":
-                    array_end_positions.append(i)
-            i += 1
-        
-        # 处理可能的错误位置
-        for pos in array_end_positions:
-            # 创建一个新的JSON字符串，将逗号替换为空格
-            fixed = json_str[:pos] + "} " + json_str[pos+2:]
+
+        # 尝试使用json5库解析（更宽松的JSON解析器）
+        if json5 is not None:
             try:
-                # 尝试解析修复后的JSON
+                result = json5.loads(json_str)
+                app_logger.info("使用json5成功解析JSON")
+                return json.dumps(result)
+            except Exception:
+                pass  # 继续尝试其他修复方法
+
+        # 定义修复策略列表
+        def fix_trailing_comma(s):
+            """修复数组最后一个元素后的逗号"""
+            result = []
+            i = 0
+            while i < len(s):
+                if i < len(s) - 1 and s[i:i+2] == "},":
+                    j = i + 2
+                    while j < len(s) and s[j].isspace():
+                        j += 1
+                    if j < len(s) and s[j] == "]":
+                        result.append("}")
+                        i += 2
+                        continue
+                result.append(s[i])
+                i += 1
+            return "".join(result)
+
+        def fix_missing_comma(s):
+            """修复缺少逗号的问题"""
+            patterns = [("}{", "},{"), ("][", "],[")]
+            for old, new in patterns:
+                s = s.replace(old, new)
+            return s
+
+        def fix_missing_brackets(s):
+            """修复缺少括号的问题"""
+            open_braces = s.count("{") - s.count("}")
+            open_brackets = s.count("[") - s.count("]")
+            return s + "}" * open_braces + "]" * open_brackets
+
+        def fix_truncate_to_last_element(s):
+            """截取到最后一个完整元素"""
+            last_end = s.rfind("}}")
+            if last_end > 0:
+                return s[:last_end+2] + "]}"
+            return s
+
+        # 依次尝试各种修复策略
+        strategies = [
+            ("修复尾随逗号", fix_trailing_comma),
+            ("修复缺少逗号", fix_missing_comma),
+            ("修复缺少括号", fix_missing_brackets),
+            ("截取到最后元素", fix_truncate_to_last_element),
+        ]
+
+        for name, strategy in strategies:
+            try:
+                fixed = strategy(json_str)
                 json.loads(fixed)
-                app_logger.info(f"成功修复数组元素后的逗号问题，位置: {pos}")
+                app_logger.info(f"成功使用策略: {name}")
                 return fixed
             except json.JSONDecodeError:
-                # 如果仍然无法解析，尝试下一个位置
-                pass
-        
-        # 修复2: 处理缺少逗号的问题
-        # 查找所有可能缺少逗号的位置
-        missing_comma_positions = []
-        i = 0
-        while i < len(json_str) - 1:
-            if json_str[i] == "}" and json_str[i+1] == "{":
-                missing_comma_positions.append(i + 1)
-            i += 1
-        
-        # 处理可能的错误位置
-        for pos in missing_comma_positions:
-            # 创建一个新的JSON字符串，添加缺失的逗号
-            fixed = json_str[:pos] + "," + json_str[pos:]
-            try:
-                # 尝试解析修复后的JSON
-                json.loads(fixed)
-                app_logger.info(f"成功修复缺少逗号问题，位置: {pos}")
-                return fixed
-            except json.JSONDecodeError:
-                # 如果仍然无法解析，尝试下一个位置
-                pass
-        
-        # 修复3: 处理JSON不完整的问题
-        # 检查JSON是否不完整（缺少右花括号或右方括号）
-        open_braces = json_str.count("{")
-        close_braces = json_str.count("}")
-        open_brackets = json_str.count("[")
-        close_brackets = json_str.count("]")
-        
-        if open_braces > close_braces:
-            # 缺少右花括号，添加缺失的右花括号
-            missing = open_braces - close_braces
-            fixed = json_str + "}" * missing
-            app_logger.info(f"添加 {missing} 个缺失的右花括号")
-            try:
-                json.loads(fixed)
-                return fixed
-            except json.JSONDecodeError:
-                # 如果仍然无法解析，尝试下一个修复方法
-                pass
-        
-        if open_brackets > close_brackets:
-            # 缺少右方括号，添加缺失的右方括号
-            missing = open_brackets - close_brackets
-            fixed = json_str + "]" * missing
-            app_logger.info(f"添加 {missing} 个缺失的右方括号")
-            try:
-                json.loads(fixed)
-                return fixed
-            except json.JSONDecodeError:
-                # 如果仍然无法解析，尝试下一个修复方法
-                pass
-        
-        # 修复4: 处理特定错误 - 当前错误是缺少逗号
-        # 尝试在每个可能的位置添加逗号
-        for i in range(len(json_str)-1):
-            if (json_str[i] == "}" and json_str[i+1] == "{"
-                or json_str[i] == "]" and json_str[i+1] == "["
-                or json_str[i] == "}" and json_str[i+1] == "["
-                or json_str[i] == "]" and json_str[i+1] == "{"
-            ):
-                fixed = json_str[:i+1] + "," + json_str[i+1:]
-                try:
-                    json.loads(fixed)
-                    app_logger.info(f"成功修复缺少逗号问题，位置: {i+1}")
-                    return fixed
-                except json.JSONDecodeError:
-                    pass
-        
-        # 修复5: 如果所有修复方法都失败，尝试修复最后一个元素
-        # 找到最后一个元素的结束位置
-        last_element_end = json_str.rfind("}}")
-        if last_element_end > 0:
-            # 尝试截取到最后一个元素结束并添加必要的结束括号
-            fixed = json_str[:last_element_end+2] + "]}"
-            try:
-                json.loads(fixed)
-                app_logger.info("成功修复最后一个元素并添加结束括号")
-                return fixed
-            except json.JSONDecodeError:
-                pass
-        
+                continue
+
         # 如果所有修复方法都失败，返回原始JSON
         app_logger.warning("无法修复JSON格式，返回原始字符串")
         return json_str

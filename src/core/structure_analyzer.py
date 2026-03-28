@@ -9,38 +9,41 @@ from ..utils.logger import app_logger
 
 class StructureAnalyzer:
     """文档结构分析器，负责分析未排版文档的结构"""
-    
+
+    # 中文标点常量（用于标题检测）
+    CHINESE_PUNCTUATION = '.!?;,\u3002\u3001\uff01\uff1f\uff1b\uff0c'
+
     def __init__(self):
         """初始化文档结构分析器"""
         # 标题关键词列表
         self.title_keywords = [
             "标题", "题目", "标题：", "题目：", "title", "subject"
         ]
-        
+
         # 摘要关键词列表
         self.abstract_keywords = [
             "摘要", "摘 要", "摘要：", "abstract", "summary"
         ]
-        
+
         # 关键词关键词列表
         self.keywords_keywords = [
             "关键词", "关键词：", "关 键 词", "keywords", "key words"
         ]
-        
+
         # 参考文献关键词列表
         self.references_keywords = [
             "参考文献", "参考文献：", "引用文献", "references", "bibliography"
         ]
-        
-        # 数字标题模式
+
+        # 数字标题模式（预编译正则表达式）
         self.numeric_title_patterns = [
-            r'^\d+\.\s+.+',  # 1. 标题
-            r'^\d+\.\d+\.\s+.+',  # 1.1. 标题
-            r'^\d+\.\d+\.\d+\.\s+.+',  # 1.1.1. 标题
-            r'^[\u4e00-\u9fa5]+\s*[\u3001\uff0c\uff1a]\s*.+',  # 一、标题
-            r'^\(\d+\)\s+.+',  # (1) 标题
-            r'^[A-Z]\.\s+.+',  # A. 标题
-            r'^[a-z]\.\s+.+'   # a. 标题
+            re.compile(r'^\d+\.\s+.+'),  # 1. 标题
+            re.compile(r'^\d+\.\d+\.\s+.+'),  # 1.1. 标题
+            re.compile(r'^\d+\.\d+\.\d+\.\s+.+'),  # 1.1.1. 标题
+            re.compile(r'^[\u4e00-\u9fa5]+\s*[\u3001\uff0c\uff1a]\s*.+'),  # 一、标题
+            re.compile(r'^\(\d+\)\s+.+'),  # (1) 标题
+            re.compile(r'^[A-Z]\.\s+.+'),  # A. 标题
+            re.compile(r'^[a-z]\.\s+.+')   # a. 标题
         ]
     
     def analyze_text_features(self, paragraphs):
@@ -124,7 +127,7 @@ class StructureAnalyzer:
                 return True
         
         # 没有标点符号的短段落可能是标题
-        if len(paragraph) < 20 and not any(p in paragraph for p in '.!?;,uff0cuff01uff1fuff1bu3002'):
+        if len(paragraph) < 20 and not any(p in paragraph for p in self.CHINESE_PUNCTUATION):
             return True
         
         return False
@@ -149,7 +152,7 @@ class StructureAnalyzer:
         # 短段落且下一段不为空
         if len(paragraph) < 30 and index < total_paragraphs - 1:
             # 没有标点符号的短段落可能是小标题
-            if not any(p in paragraph for p in '.!?;,uff0cuff01uff1fuff1bu3002'):
+            if not any(p in paragraph for p in self.CHINESE_PUNCTUATION):
                 return True
         
         return False

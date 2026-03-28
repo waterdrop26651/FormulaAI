@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FormulaAI 测试报告</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f5f5; padding: 20px; }
+        .container { max-width: 900px; margin: 0 auto; }
+        h1 { text-align: center; color: #333; margin-bottom: 30px; }
+        .summary { background: white; border-radius: 10px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .summary-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; }
+        .stat { text-align: center; padding: 15px; border-radius: 8px; }
+        .stat-value { font-size: 2em; font-weight: bold; }
+        .stat-label { color: #666; margin-top: 5px; }
+        .passed { background: #e8f5e9; color: #2e7d32; }
+        .failed { background: #ffebee; color: #c62828; }
+        .total { background: #e3f2fd; color: #1565c0; }
+        .rate { background: #fff3e0; color: #ef6c00; }
+
+        .test-section { background: white; border-radius: 10px; margin-bottom: 20px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .section-header { background: #1976d2; color: white; padding: 15px 20px; font-size: 1.1em; }
+        .test-item { padding: 15px 20px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
+        .test-item:last-child { border-bottom: none; }
+        .test-name { font-weight: 500; }
+        .test-status { padding: 5px 15px; border-radius: 20px; font-size: 0.9em; }
+        .status-pass { background: #e8f5e9; color: #2e7d32; }
+        .status-fail { background: #ffebee; color: #c62828; }
+
+        .improvements { background: white; border-radius: 10px; padding: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .improvements h2 { margin-bottom: 15px; color: #333; }
+        .improvement-item { padding: 10px 0; border-bottom: 1px solid #eee; }
+        .improvement-item:last-child { border-bottom: none; }
+        .file-tag { background: #e3f2fd; color: #1565c0; padding: 2px 8px; border-radius: 4px; font-family: monospace; font-size: 0.9em; }
+
+        .footer { text-align: center; margin-top: 30px; color: #666; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 FormulaAI 测试报告</h1>
+
+        <div class="summary">
+            <div class="summary-grid">
+                <div class="stat passed">
+                    <div class="stat-value">13</div>
+                    <div class="stat-label">通过</div>
+                </div>
+                <div class="stat failed">
+                    <div class="stat-value">1</div>
+                    <div class="stat-label">失败</div>
+                </div>
+                <div class="stat total">
+                    <div class="stat-value">14</div>
+                    <div class="stat-label">总计</div>
+                </div>
+                <div class="stat rate">
+                    <div class="stat-value">93%</div>
+                    <div class="stat-label">通过率</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <div class="section-header">📋 测试1: Unicode字符串修复验证</div>
+            <div class="test-item">
+                <span class="test-name">'论文标题' -> 无标点，应检测为标题</span>
+                <span class="test-status status-pass">✓ 通过</span>
+            </div>
+            <div class="test-item">
+                <span class="test-name">'论文标题。' -> 有句号，不应是标题</span>
+                <span class="test-status status-pass">✓ 通过</span>
+            </div>
+            <div class="test-item">
+                <span class="test-name">'引言，背景' -> 有逗号，不应是标题</span>
+                <span class="test-status status-pass">✓ 通过</span>
+            </div>
+            <div class="test-item">
+                <span class="test-name">'摘要' -> 无标点，应是标题</span>
+                <span class="test-status status-pass">✓ 通过</span>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <div class="section-header">📋 测试2: 正则表达式预编译验证</div>
+            <div class="test-item">
+                <span class="test-name">'1. 引言' -> 匹配数字标题模式</span>
+                <span class="test-status status-pass">✓ 通过</span>
+            </div>
+            <div class="test-item">
+                <span class="test-name">'1.1. 背景' -> 匹配二级标题模式</span>
+                <span class="test-status status-pass">✓ 通过</span>
+            </div>
+            <div class="test-item">
+                <span class="test-name">'一、研究背景' -> 匹配中文标题模式</span>
+                <span class="test-status status-pass">✓ 通过</span>
+            </div>
+            <div class="test-item">
+                <span class="test-name">'这是正文' -> 不匹配任何标题模式</span>
+                <span class="test-status status-pass">✓ 通过</span>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <div class="section-header">📋 测试3: JSON修复功能验证</div>
+            <div class="test-item">
+                <span class="test-name">'{"key": "value"}' -> 正常JSON解析</span>
+                <span class="test-status status-pass">✓ 通过</span>
+            </div>
+            <div class="test-item">
+                <span class="test-name">'{"elements": [1, 2, 3}' -> 缺少括号修复</span>
+                <span class="test-status status-fail">✗ 失败</span>
+            </div>
+            <div class="test-item">
+                <span class="test-name">'{"a": 1, "b": 2' -> 缺少花括号修复</span>
+                <span class="test-status status-pass">✓ 通过</span>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <div class="section-header">📋 测试4: Python语法检查</div>
+            <div class="test-item">
+                <span class="test-name"><span class="file-tag">structure_analyzer.py</span></span>
+                <span class="test-status status-pass">✓ 通过</span>
+            </div>
+            <div class="test-item">
+                <span class="test-name"><span class="file-tag">doc_processor.py</span></span>
+                <span class="test-status status-pass">✓ 通过</span>
+            </div>
+            <div class="test-item">
+                <span class="test-name"><span class="file-tag">ai_connector.py</span></span>
+                <span class="test-status status-pass">✓ 通过</span>
+            </div>
+        </div>
+
+        <div class="improvements">
+            <h2>✨ 本次改进内容</h2>
+            <div class="improvement-item">
+                <strong>修复Unicode错误</strong> - <span class="file-tag">structure_analyzer.py:127,152</span>
+                <br><small style="color:#666">中文标点Unicode字符串缺少\u前缀，导致标题检测失效</small>
+            </div>
+            <div class="improvement-item">
+                <strong>移除过度GC</strong> - <span class="file-tag">doc_processor.py</span>
+                <br><small style="color:#666">删除每元素gc.collect()调用，提升性能</small>
+            </div>
+            <div class="improvement-item">
+                <strong>修复未定义变量</strong> - <span class="file-tag">template_panel.py:413-414</span>
+                <br><small style="color:#666">删除未定义的apply_btn和edit_template_btn引用</small>
+            </div>
+            <div class="improvement-item">
+                <strong>简化JSON修复</strong> - <span class="file-tag">ai_connector.py</span>
+                <br><small style="color:#666">_fix_json方法从125行简化为70行，使用json5库</small>
+            </div>
+            <div class="improvement-item">
+                <strong>预编译正则</strong> - <span class="file-tag">structure_analyzer.py</span>
+                <br><small style="color:#666">在__init__中使用re.compile()预编译所有模式</small>
+            </div>
+            <div class="improvement-item">
+                <strong>新增项目配置</strong> - <span class="file-tag">pyproject.toml</span>
+                <br><small style="color:#666">现代Python项目配置，包含依赖管理</small>
+            </div>
+            <div class="improvement-item">
+                <strong>新增测试框架</strong> - <span class="file-tag">tests/test_ui.py</span>
+                <br><small style="color:#666">UI模块单元测试（pytest-qt）</small>
+            </div>
+            <div class="improvement-item">
+                <strong>新增代码检查</strong> - <span class="file-tag">.pre-commit-config.yaml</span>
+                <br><small style="color:#666">pre-commit钩子（black、flake8、mypy）</small>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>生成时间: 2026-03-28 18:02</p>
+            <p>FormulaAI - AI智能文档排版工具</p>
+        </div>
+    </div>
+</body>
+</html>
