@@ -49,3 +49,31 @@ def test_parse_response_reports_error_for_template_shape():
 
     assert success is False
     assert "elements" in message
+
+
+def test_parse_response_repairs_trailing_comma_and_normalizes_alignment():
+    connector = AIConnector({"api_url": "https://example.com", "api_key": "key", "model": "demo"})
+    malformed = """
+{
+  "elements": [
+    {
+      "type": "正文",
+      "content": "测试内容",
+      "format": {"font": "宋体", "size": "小四", "bold": false, "line_spacing": 1.5, "alignment": "两端对齐",}
+    }
+  ]
+}
+"""
+    success, result = connector.parse_response(_response_with_content(malformed))
+
+    assert success is True
+    assert result["elements"][0]["format"]["alignment"] == "justify"
+
+
+def test_validate_config_rejects_blank_values_without_request():
+    connector = AIConnector({"api_url": "", "api_key": "", "model": ""})
+
+    success, message = connector.validate_config()
+
+    assert success is False
+    assert "API URL不能为空" in message

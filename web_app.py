@@ -23,6 +23,10 @@ from src.core.doc_processor import DocProcessor
 from src.core.structure_analyzer import StructureAnalyzer
 from src.core.header_footer_config import HeaderFooterConfig
 from src.core.text_template_parser import TextTemplateParser
+from src.runtime.events import CallbackEventSink
+from src.runtime.contracts import RuntimeErrorCode
+from src.runtime.document_format_harness import DocumentFormatHarness
+from src.runtime.template_rules import normalize_alignment, normalize_template_rules
 from src.utils.config_manager import ConfigManager
 from src.utils.logger import app_logger
 
@@ -720,59 +724,6 @@ def element_type_label(value: str) -> str:
     return ELEMENT_TYPE_LABELS.get(value, {}).get(language, value)
 
 
-ALIGNMENT_ALIASES = {
-    "left": "left",
-    "center": "center",
-    "right": "right",
-    "justify": "justify",
-    "justified": "justify",
-    "leftalign": "left",
-    "centeralign": "center",
-    "rightalign": "right",
-    "justifiedalign": "justify",
-    "左对齐": "left",
-    "左": "left",
-    "居中": "center",
-    "居中对齐": "center",
-    "右对齐": "right",
-    "右": "right",
-    "两端对齐": "justify",
-    "两端": "justify",
-}
-
-
-def normalize_alignment(value):
-    """统一对齐值为 left/center/right/justify"""
-    raw = str(value or "").strip()
-    key = raw.lower().replace(" ", "")
-
-    if key in ALIGNMENT_ALIASES:
-        return ALIGNMENT_ALIASES[key]
-
-    if "居中" in raw:
-        return "center"
-    if "右" in raw:
-        return "right"
-    if "两端" in raw:
-        return "justify"
-    return "left"
-
-
-def normalize_template_rules(rules: dict):
-    """标准化模板规则，当前主要统一 alignment 字段"""
-    if not isinstance(rules, dict):
-        return {}
-
-    normalized = {}
-    for element_type, rule in rules.items():
-        if not isinstance(rule, dict):
-            continue
-        normalized_rule = dict(rule)
-        normalized_rule["alignment"] = normalize_alignment(rule.get("alignment", "left"))
-        normalized[element_type] = normalized_rule
-    return normalized
-
-
 def load_api_config():
     """加载API配置"""
     api_config = config_manager.get_api_config()
@@ -825,74 +776,59 @@ load_header_footer_config()
 def process_document(uploaded_file, template_name: str, api_url: str, api_key: str, model: str, hf_config: dict):
     """处理文档排版"""
     add_log(t("log_start_processing"))
-    with tempfile.TemporaryDirectory() as temp_dir:
-        input_path = os.path.join(temp_dir, "input.docx")
-        with open(input_path, "wb") as f:
-            f.write(uploaded_file.getvalue())
-        add_log(t("log_temp_created", path=input_path))
 
-        # 1. 读取文档（复用核心处理链路）
-        doc_processor = DocProcessor()
-        if not doc_processor.read_document(input_path):
-            raise ValueError(t("error_doc_read_failed"))
-        paragraphs_text = doc_processor.get_document_text()
-        add_log(t("log_doc_read", count=len(paragraphs_text)))
+    def on_runtime_event(event: dict):
+        stage = event.get("stage")
+        if stage == RuntimeErrorCode.RUNTIME_INTERNAL_ERROR.value:
+            return
+        if stage == "DOCUMENT_LOADED":
+            add_log(t("log_doc_read", count=event.get("paragraph_count", 0)))
+        elif stage == "TEMPLATE_RESOLVED":
+            add_log(t("log_template_loaded", name=event.get("template_name", template_name)))
+        elif stage == "PROMPT_BUILT":
+            add_log(t("log_calling_ai"))
+        elif stage == "AI_RESPONSE_RECEIVED":
+            add_log(t("log_ai_received"))
+        elif stage == "PLAN_VALIDATED":
+            add_log(t("log_generated_instructions", count=event.get("instruction_count", 0)))
 
-        # 2. 获取并标准化模板
-        format_manager = FormatManager()
-        template = format_manager.get_template(template_name)
-        if not template:
-            raise ValueError(t("error_template_not_found", name=template_name))
-        template_rules = normalize_template_rules(template.get("rules", {}))
-        add_log(t("log_template_loaded", name=template_name))
-
-        # 3. 调用AI API生成排版指令
-        api_config = {
+    harness = DocumentFormatHarness()
+    result = harness.run(
+        source_name=uploaded_file.name,
+        source_bytes=uploaded_file.getvalue(),
+        template_name=template_name,
+        api_config={
             "api_url": api_url,
             "api_key": api_key,
             "model": model,
             "timeout": 300,
-        }
-        ai_connector = AIConnector(api_config)
-        valid, error_msg = ai_connector.validate_config()
-        if not valid:
-            raise ValueError(t("error_invalid_api_config", message=error_msg))
-
-        add_log(t("log_calling_ai"))
-        prompt = ai_connector.generate_prompt(paragraphs_text, template_rules)
-        success, response = ai_connector.send_request(prompt)
-        if not success:
-            raise ValueError(t("error_ai_request_failed", message=response))
-        add_log(t("log_ai_received"))
-
-        success, formatting_instructions = ai_connector.parse_response(response)
-        if not success:
-            raise ValueError(t("error_parse_response_failed", message=formatting_instructions))
-        add_log(t("log_generated_instructions", count=len(formatting_instructions.get('elements', []))))
-
-        # 4. 复用核心文档处理器（含页眉页脚）
-        header_footer_config = HeaderFooterConfig.from_dict(hf_config or {})
-        is_valid_hf, hf_error = header_footer_config.validate()
-        if not is_valid_hf:
-            raise ValueError(t("error_invalid_header_footer", message=hf_error))
-
-        success = doc_processor.apply_formatting(
-            formatting_instructions,
-            custom_save_path=temp_dir,
-            header_footer_config=header_footer_config,
-        )
-        if not success:
-            raise ValueError(t("error_formatting_failed"))
-
-        output_file = doc_processor.get_output_file()
-        if not output_file or not os.path.exists(output_file):
-            raise ValueError(t("error_output_not_found"))
-
-        with open(output_file, "rb") as f:
-            output_bytes = f.read()
-
+        },
+        header_footer_config=hf_config or {},
+        language=st.session_state.get("language", "zh"),
+        event_sink=CallbackEventSink(on_runtime_event),
+    )
+    if result.output_bytes is not None:
         add_log(t("log_format_complete"))
-        return output_bytes
+        return result.output_bytes
+
+    error_message = result.error_message or ""
+    if result.error_code == RuntimeErrorCode.DOCUMENT_READ_FAILED:
+        raise ValueError(t("error_doc_read_failed"))
+    if result.error_code == RuntimeErrorCode.TEMPLATE_NOT_FOUND:
+        raise ValueError(t("error_template_not_found", name=template_name))
+    if result.error_code == RuntimeErrorCode.INVALID_API_CONFIG:
+        raise ValueError(t("error_invalid_api_config", message=error_message))
+    if result.error_code == RuntimeErrorCode.AI_REQUEST_FAILED:
+        raise ValueError(t("error_ai_request_failed", message=error_message))
+    if result.error_code == RuntimeErrorCode.AI_RESPONSE_INVALID:
+        raise ValueError(t("error_parse_response_failed", message=error_message))
+    if result.error_code == RuntimeErrorCode.HEADER_FOOTER_INVALID:
+        raise ValueError(t("error_invalid_header_footer", message=error_message))
+    if result.error_code == RuntimeErrorCode.FORMATTING_FAILED:
+        raise ValueError(t("error_formatting_failed"))
+    if result.error_code == RuntimeErrorCode.OUTPUT_NOT_FOUND:
+        raise ValueError(t("error_output_not_found"))
+    raise ValueError(error_message or t("processing_failed", error=t("unknown")))
 
 
 # ========================

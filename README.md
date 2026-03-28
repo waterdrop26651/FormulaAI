@@ -60,6 +60,12 @@ FormulaAI/
 │   │   ├── structure_analyzer.py# 结构分析器
 │   │   ├── header_footer_config.py # 页眉页脚配置
 │   │   └── header_footer_processor.py # 页眉页脚处理器
+│   ├── runtime/         # 运行时编排层
+│   │   ├── contracts.py # 运行时请求/结果/阶段契约
+│   │   ├── document_format_harness.py # 文档排版运行时 harness
+│   │   ├── events.py    # 运行时事件适配
+│   │   ├── run_store.py # 运行元数据持久化
+│   │   └── template_rules.py # 共享规则标准化
 │   └── utils/           # 工具类模块
 │       ├── config_manager.py  # 配置管理器
 │       ├── font_manager.py    # 字体管理器
@@ -194,12 +200,16 @@ python -m pytest -q
 当前测试覆盖：
 - 文档结构分析器
 - 模板文本解析与规则标准化
+- 运行时 harness、运行记录与 Web 编排入口
 - `ConfigManager` / `FormatManager`
 - `HeaderFooterConfig` / `HeaderFooterProcessor`
 - `AIConnector` 的无网络解析逻辑
 
 ## 当前状态
 
+- Web 页面现在通过 `src/runtime/document_format_harness.py` 调用核心排版链路
+- Phase 1 运行时 harness 已引入显式请求/结果契约、阶段记录与脱敏运行元数据
+- 运行记录默认只保留 `manifest.json` / `events.jsonl` 这类脱敏元数据，不默认持久化原始文档、prompt、response
 - Web 排版流程已接入核心 `DocProcessor`
 - 页眉页脚配置已接入实际文档输出链路
 - 模板和 AI 响应中的 `alignment` 会统一标准化为 `left / center / right / justify`
