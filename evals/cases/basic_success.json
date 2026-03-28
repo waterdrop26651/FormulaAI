@@ -1,0 +1,50 @@
+{
+  "schema_version": "formulaai.eval_case.v1",
+  "id": "basic_success",
+  "description": "Basic runtime success with deterministic formatting instructions.",
+  "source": {
+    "source_name": "basic_success.docx",
+    "paragraphs": [
+      "论文标题",
+      "这是正文。"
+    ]
+  },
+  "template": {
+    "name": "测试模板",
+    "rules": {
+      "标题": {
+        "font": "黑体",
+        "size": "小二",
+        "bold": true,
+        "line_spacing": 1.0,
+        "alignment": "center"
+      },
+      "正文": {
+        "font": "宋体",
+        "size": "小四",
+        "bold": false,
+        "line_spacing": 1.5,
+        "alignment": "justify"
+      }
+    }
+  },
+  "ai": {
+    "validate_ok": true,
+    "validate_message": "ok",
+    "request_ok": true,
+    "response_content": "{\"elements\":[{\"type\":\"标题\",\"content\":\"论文标题\",\"format\":{\"font\":\"黑体\",\"size\":\"小二\",\"bold\":true,\"line_spacing\":1.0,\"alignment\":\"center\"}},{\"type\":\"正文\",\"content\":\"这是正文。\",\"format\":{\"font\":\"宋体\",\"size\":\"小四\",\"bold\":false,\"line_spacing\":1.5,\"alignment\":\"justify\"}}]}"
+  },
+  "header_footer_config": {},
+  "expect": {
+    "status": "succeeded",
+    "final_stage": "COMPLETED",
+    "instruction_count": 2,
+    "processed_elements": 2,
+    "output_document_loadable": true,
+    "output_paragraph_count": 2,
+    "output_alignments": [
+      "center",
+      "justify"
+    ]
+  }
+}

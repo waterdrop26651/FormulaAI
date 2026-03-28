@@ -51,6 +51,9 @@ dev = [
 Homepage = "https://github.com/waterdrop26651/FormulaAI"
 Repository = "https://github.com/waterdrop26651/FormulaAI"
 
+[project.scripts]
+formulaai-eval = "src.runtime.eval_harness:main"
+
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["src*"]

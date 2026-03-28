@@ -1,0 +1,50 @@
+{
+  "schema_version": "formulaai.eval_case.v1",
+  "id": "wrapped_alignment_success",
+  "description": "Wrapped AI JSON content is parsed and Chinese alignment aliases are normalized.",
+  "source": {
+    "source_name": "wrapped_alignment_success.docx",
+    "paragraphs": [
+      "论文标题",
+      "这是正文。"
+    ]
+  },
+  "template": {
+    "name": "测试模板",
+    "rules": {
+      "标题": {
+        "font": "黑体",
+        "size": "小二",
+        "bold": true,
+        "line_spacing": 1.0,
+        "alignment": "居中"
+      },
+      "正文": {
+        "font": "宋体",
+        "size": "小四",
+        "bold": false,
+        "line_spacing": 1.5,
+        "alignment": "两端对齐"
+      }
+    }
+  },
+  "ai": {
+    "validate_ok": true,
+    "validate_message": "ok",
+    "request_ok": true,
+    "response_content": "以下是排版结果：\n{\n  \"elements\": [\n    {\n      \"type\": \"标题\",\n      \"content\": \"论文标题\",\n      \"format\": {\n        \"font\": \"黑体\",\n        \"size\": \"小二\",\n        \"bold\": true,\n        \"line_spacing\": 1.0,\n        \"alignment\": \"居中\"\n      }\n    },\n    {\n      \"type\": \"正文\",\n      \"content\": \"这是正文。\",\n      \"format\": {\n        \"font\": \"宋体\",\n        \"size\": \"小四\",\n        \"bold\": false,\n        \"line_spacing\": 1.5,\n        \"alignment\": \"两端对齐\"\n      }\n    }\n  ]\n}"
+  },
+  "header_footer_config": {},
+  "expect": {
+    "status": "succeeded",
+    "final_stage": "COMPLETED",
+    "instruction_count": 2,
+    "processed_elements": 2,
+    "output_document_loadable": true,
+    "output_paragraph_count": 2,
+    "output_alignments": [
+      "center",
+      "justify"
+    ]
+  }
+}

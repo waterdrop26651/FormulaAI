@@ -862,6 +862,21 @@ def process_document(
     raise ValueError(error_message or t("processing_failed", error=t("unknown")))
 
 
+def render_download_result_button(uploaded_file):
+    """Render the formatted document download button when output is available."""
+    output_bytes = st.session_state.get("output_bytes")
+    if not output_bytes:
+        return
+
+    st.download_button(
+        label=t("download_result"),
+        data=output_bytes,
+        file_name=f"formatted_{uploaded_file.name if uploaded_file else 'document.docx'}",
+        mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        use_container_width=True
+    )
+
+
 # ========================
 # 页面：文档排版
 # ========================
@@ -952,14 +967,7 @@ def page_document_format():
             st.rerun()
 
     with col3:
-        if st.session_state.output_bytes:
-            st.download_button(
-                label=t("download_result"),
-                data=st.session_state.output_bytes,
-                file_name=f"formatted_{uploaded_file.name if uploaded_file else 'document.docx'}",
-                mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-                use_container_width=True
-            )
+        render_download_result_button(uploaded_file)
 
     # 处理排版
     if start_button:
@@ -992,6 +1000,7 @@ def page_document_format():
                 st.session_state.output_bytes = output_bytes
 
                 st.success(t("formatting_complete"))
+                render_download_result_button(uploaded_file)
 
             except Exception as e:
                 st.error(t("processing_failed", error=str(e)))

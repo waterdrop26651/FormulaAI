@@ -31,6 +31,7 @@ wheels/
 config/api_config.json
 *.log
 已排版/
+/runtime/
 
 # 系统文件
 .DS_Store

@@ -1,0 +1,44 @@
+{
+  "schema_version": "formulaai.eval_case.v1",
+  "id": "invalid_response",
+  "description": "Template-like AI response should fail runtime validation with AI_RESPONSE_INVALID.",
+  "source": {
+    "source_name": "invalid_response.docx",
+    "paragraphs": [
+      "论文标题",
+      "这是正文。"
+    ]
+  },
+  "template": {
+    "name": "测试模板",
+    "rules": {
+      "标题": {
+        "font": "黑体",
+        "size": "小二",
+        "bold": true,
+        "line_spacing": 1.0,
+        "alignment": "center"
+      },
+      "正文": {
+        "font": "宋体",
+        "size": "小四",
+        "bold": false,
+        "line_spacing": 1.5,
+        "alignment": "justify"
+      }
+    }
+  },
+  "ai": {
+    "validate_ok": true,
+    "validate_message": "ok",
+    "request_ok": true,
+    "response_content": "{\"name\":\"模板\",\"description\":\"desc\",\"rules\":{\"正文\":{\"font\":\"宋体\"}}}"
+  },
+  "header_footer_config": {},
+  "expect": {
+    "status": "failed",
+    "final_stage": "FAILED",
+    "instruction_count": 0,
+    "error_code": "AI_RESPONSE_INVALID"
+  }
+}
