@@ -704,6 +704,22 @@ ELEMENT_TYPE_LABELS = {
     "参考文献": {"zh": "参考文献", "en": "References"},
 }
 
+RUNTIME_STAGE_PROGRESS = {
+    "INIT": 5,
+    "INPUT_STAGED": 10,
+    "DOCUMENT_LOADED": 25,
+    "TEMPLATE_RESOLVED": 35,
+    "API_VALIDATED": 45,
+    "STRUCTURE_HINTED": 50,
+    "PROMPT_BUILT": 55,
+    "AI_RESPONSE_RECEIVED": 60,
+    "PLAN_VALIDATED": 70,
+    "HEADER_FOOTER_VALIDATED": 85,
+    "DOCUMENT_RENDERED": 95,
+    "OUTPUT_READY": 98,
+    "COMPLETED": 100,
+}
+
 
 def add_log(message: str, level: str = "INFO"):
     """添加日志"""
@@ -722,6 +738,11 @@ def element_type_label(value: str) -> str:
     """返回元素类型的本地化显示文案。"""
     language = st.session_state.get("language", "zh")
     return ELEMENT_TYPE_LABELS.get(value, {}).get(language, value)
+
+
+def runtime_stage_progress(stage: str):
+    """Map runtime stages to progress percentages."""
+    return RUNTIME_STAGE_PROGRESS.get(stage)
 
 
 def load_api_config():
@@ -773,12 +794,22 @@ load_header_footer_config()
 # ========================
 # 文档处理函数
 # ========================
-def process_document(uploaded_file, template_name: str, api_url: str, api_key: str, model: str, hf_config: dict):
+def process_document(
+    uploaded_file,
+    template_name: str,
+    api_url: str,
+    api_key: str,
+    model: str,
+    hf_config: dict,
+    runtime_event_handler=None,
+):
     """处理文档排版"""
     add_log(t("log_start_processing"))
 
     def on_runtime_event(event: dict):
         stage = event.get("stage")
+        if runtime_event_handler:
+            runtime_event_handler(event)
         if stage == RuntimeErrorCode.RUNTIME_INTERNAL_ERROR.value:
             return
         if stage == "DOCUMENT_LOADED":
@@ -940,7 +971,12 @@ def page_document_format():
 
             try:
                 status_text.text(t("processing_document_status"))
-                progress_bar.progress(20)
+                progress_bar.progress(runtime_stage_progress("INIT") or 0)
+
+                def handle_runtime_progress(event: dict):
+                    progress = runtime_stage_progress(event.get("stage"))
+                    if progress is not None:
+                        progress_bar.progress(progress)
 
                 output_bytes = process_document(
                     uploaded_file,
@@ -948,10 +984,11 @@ def page_document_format():
                     st.session_state.api_url,
                     st.session_state.api_key,
                     st.session_state.model,
-                    st.session_state.header_footer_config
+                    st.session_state.header_footer_config,
+                    runtime_event_handler=handle_runtime_progress,
                 )
 
-                progress_bar.progress(100)
+                progress_bar.progress(runtime_stage_progress("COMPLETED") or 100)
                 st.session_state.output_bytes = output_bytes
 
                 st.success(t("formatting_complete"))

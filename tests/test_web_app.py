@@ -97,3 +97,11 @@ def test_normalize_template_rules_available_from_web_app():
     )
 
     assert normalized["正文"]["alignment"] == "justify"
+
+
+def test_runtime_stage_progress_maps_runtime_stages_to_percentages():
+    assert web_app.runtime_stage_progress("INIT") == 5
+    assert web_app.runtime_stage_progress("DOCUMENT_LOADED") == 25
+    assert web_app.runtime_stage_progress("PLAN_VALIDATED") == 70
+    assert web_app.runtime_stage_progress("COMPLETED") == 100
+    assert web_app.runtime_stage_progress("UNKNOWN") is None
