@@ -70,6 +70,16 @@ class InvalidConfigAIConnector(FakeAIConnector):
         return False, "missing url"
 
 
+class FailedRequestAIConnector(FakeAIConnector):
+    def send_request(self, prompt):
+        return False, "gateway timeout"
+
+
+class InvalidResponseAIConnector(FakeAIConnector):
+    def parse_response(self, response):
+        return False, "missing elements"
+
+
 class ReportingDocProcessor:
     def __init__(self):
         self.input_file = None
@@ -112,6 +122,21 @@ class FailedReportingDocProcessor(ReportingDocProcessor):
             "processed_elements": 1,
             "failed_elements": [{"index": 1, "error": "boom"}],
             "warnings": ["partial failure"],
+            "backup_path": None,
+            "output_file": None,
+            "header_footer": {"attempted": True, "success": True, "error": None},
+        }
+
+
+class MissingOutputReportingDocProcessor(ReportingDocProcessor):
+    def apply_formatting(self, formatting_instructions, custom_save_path=None, header_footer_config=None):
+        self.output_file = None
+        return {
+            "success": True,
+            "total_elements": len(formatting_instructions["elements"]),
+            "processed_elements": len(formatting_instructions["elements"]),
+            "failed_elements": [],
+            "warnings": [],
             "backup_path": None,
             "output_file": None,
             "header_footer": {"attempted": True, "success": True, "error": None},
@@ -232,6 +257,48 @@ def test_document_format_harness_invalid_header_footer_returns_failed_result(tmp
     assert result.error_code == RuntimeErrorCode.HEADER_FOOTER_INVALID
 
 
+def test_document_format_harness_ai_request_failure_returns_failed_result(tmp_path):
+    harness = DocumentFormatHarness(
+        runtime_dir=tmp_path / "runtime",
+        format_manager=FakeFormatManager(),
+        doc_processor_factory=ReportingDocProcessor,
+        ai_connector_factory=FailedRequestAIConnector,
+    )
+
+    result = harness.run(
+        source_name="input.docx",
+        source_bytes=_docx_bytes(),
+        template_name="测试模板",
+        api_config={"api_url": "https://example.com", "api_key": "k", "model": "demo", "timeout": 1},
+        header_footer_config={},
+    )
+
+    assert result.status == RunStatus.FAILED
+    assert result.error_code == RuntimeErrorCode.AI_REQUEST_FAILED
+    assert result.error_message == "gateway timeout"
+
+
+def test_document_format_harness_ai_response_invalid_returns_failed_result(tmp_path):
+    harness = DocumentFormatHarness(
+        runtime_dir=tmp_path / "runtime",
+        format_manager=FakeFormatManager(),
+        doc_processor_factory=ReportingDocProcessor,
+        ai_connector_factory=InvalidResponseAIConnector,
+    )
+
+    result = harness.run(
+        source_name="input.docx",
+        source_bytes=_docx_bytes(),
+        template_name="测试模板",
+        api_config={"api_url": "https://example.com", "api_key": "k", "model": "demo", "timeout": 1},
+        header_footer_config={},
+    )
+
+    assert result.status == RunStatus.FAILED
+    assert result.error_code == RuntimeErrorCode.AI_RESPONSE_INVALID
+    assert result.error_message == "missing elements"
+
+
 def test_document_format_harness_surfaces_failed_render_report(tmp_path):
     harness = DocumentFormatHarness(
         runtime_dir=tmp_path / "runtime",
@@ -251,3 +318,23 @@ def test_document_format_harness_surfaces_failed_render_report(tmp_path):
     assert result.status == RunStatus.FAILED
     assert result.error_code == RuntimeErrorCode.FORMATTING_FAILED
     assert result.render_report["failed_elements"]
+
+
+def test_document_format_harness_missing_output_returns_failed_result(tmp_path):
+    harness = DocumentFormatHarness(
+        runtime_dir=tmp_path / "runtime",
+        format_manager=FakeFormatManager(),
+        doc_processor_factory=MissingOutputReportingDocProcessor,
+        ai_connector_factory=FakeAIConnector,
+    )
+
+    result = harness.run(
+        source_name="input.docx",
+        source_bytes=_docx_bytes(),
+        template_name="测试模板",
+        api_config={"api_url": "https://example.com", "api_key": "k", "model": "demo", "timeout": 1},
+        header_footer_config={},
+    )
+
+    assert result.status == RunStatus.FAILED
+    assert result.error_code == RuntimeErrorCode.OUTPUT_NOT_FOUND
