@@ -70,6 +70,51 @@ class InvalidConfigAIConnector(FakeAIConnector):
         return False, "missing url"
 
 
+class ReportingDocProcessor:
+    def __init__(self):
+        self.input_file = None
+        self.output_file = None
+
+    def read_document(self, file_path):
+        self.input_file = file_path
+        return True
+
+    def get_document_text(self):
+        return ["论文标题", "这是正文。"]
+
+    def apply_formatting(self, formatting_instructions, custom_save_path=None, header_footer_config=None):
+        output_path = Path(custom_save_path) / "output.docx"
+        output_path.write_bytes(b"docx-bytes")
+        self.output_file = str(output_path)
+        return {
+            "success": True,
+            "total_elements": len(formatting_instructions["elements"]),
+            "processed_elements": len(formatting_instructions["elements"]),
+            "failed_elements": [],
+            "warnings": [],
+            "backup_path": None,
+            "output_file": self.output_file,
+            "header_footer": {"attempted": True, "success": True, "error": None},
+        }
+
+    def get_output_file(self):
+        return self.output_file
+
+
+class FailedReportingDocProcessor(ReportingDocProcessor):
+    def apply_formatting(self, formatting_instructions, custom_save_path=None, header_footer_config=None):
+        return {
+            "success": False,
+            "total_elements": len(formatting_instructions["elements"]),
+            "processed_elements": 1,
+            "failed_elements": [{"index": 1, "error": "boom"}],
+            "warnings": ["partial failure"],
+            "backup_path": None,
+            "output_file": None,
+            "header_footer": {"attempted": True, "success": True, "error": None},
+        }
+
+
 def _docx_bytes():
     document = Document()
     document.add_paragraph("论文标题")
@@ -84,6 +129,7 @@ def test_document_format_harness_happy_path(tmp_path):
     harness = DocumentFormatHarness(
         runtime_dir=tmp_path / "runtime",
         format_manager=FakeFormatManager(),
+        doc_processor_factory=ReportingDocProcessor,
         ai_connector_factory=FakeAIConnector,
     )
 
@@ -101,6 +147,7 @@ def test_document_format_harness_happy_path(tmp_path):
     assert result.instruction_count == 2
     assert result.output_path is None
     assert result.stage_history[0].stage == RunStage.INIT
+    assert result.render_report["processed_elements"] == 2
     manifests = list((tmp_path / "runtime" / "runs").rglob("manifest.json"))
     assert manifests
     manifest = json.loads(manifests[0].read_text(encoding="utf-8"))
@@ -112,6 +159,7 @@ def test_document_format_harness_invalid_api_config_returns_failed_result(tmp_pa
     harness = DocumentFormatHarness(
         runtime_dir=tmp_path / "runtime",
         format_manager=FakeFormatManager(),
+        doc_processor_factory=ReportingDocProcessor,
         ai_connector_factory=InvalidConfigAIConnector,
     )
 
@@ -141,6 +189,7 @@ def test_document_format_harness_missing_template_returns_failed_result(tmp_path
     harness = DocumentFormatHarness(
         runtime_dir=tmp_path / "runtime",
         format_manager=FakeFormatManager(template=None),
+        doc_processor_factory=ReportingDocProcessor,
         ai_connector_factory=FakeAIConnector,
     )
 
@@ -160,6 +209,7 @@ def test_document_format_harness_invalid_header_footer_returns_failed_result(tmp
     harness = DocumentFormatHarness(
         runtime_dir=tmp_path / "runtime",
         format_manager=FakeFormatManager(),
+        doc_processor_factory=ReportingDocProcessor,
         ai_connector_factory=FakeAIConnector,
     )
 
@@ -173,3 +223,24 @@ def test_document_format_harness_invalid_header_footer_returns_failed_result(tmp
 
     assert result.status == RunStatus.FAILED
     assert result.error_code == RuntimeErrorCode.HEADER_FOOTER_INVALID
+
+
+def test_document_format_harness_surfaces_failed_render_report(tmp_path):
+    harness = DocumentFormatHarness(
+        runtime_dir=tmp_path / "runtime",
+        format_manager=FakeFormatManager(),
+        doc_processor_factory=FailedReportingDocProcessor,
+        ai_connector_factory=FakeAIConnector,
+    )
+
+    result = harness.run(
+        source_name="input.docx",
+        source_bytes=_docx_bytes(),
+        template_name="测试模板",
+        api_config={"api_url": "https://example.com", "api_key": "k", "model": "demo", "timeout": 1},
+        header_footer_config={},
+    )
+
+    assert result.status == RunStatus.FAILED
+    assert result.error_code == RuntimeErrorCode.FORMATTING_FAILED
+    assert result.render_report["failed_elements"]

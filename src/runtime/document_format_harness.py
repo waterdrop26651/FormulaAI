@@ -190,12 +190,23 @@ class DocumentFormatHarness:
                 )
             emit(RunStage.HEADER_FOOTER_VALIDATED, RunStatus.RUNNING, "header/footer validated")
 
-            success = doc_processor.apply_formatting(
+            render_report = doc_processor.apply_formatting(
                 formatting_instructions,
                 custom_save_path=str(temp_dir),
                 header_footer_config=hf_config,
             )
-            if not success:
+            if isinstance(render_report, bool):
+                render_report = {
+                    "success": render_report,
+                    "total_elements": instruction_count,
+                    "processed_elements": instruction_count if render_report else 0,
+                    "failed_elements": [],
+                    "warnings": [],
+                    "backup_path": None,
+                    "output_file": doc_processor.get_output_file(),
+                    "header_footer": {"attempted": bool(request.header_footer_config), "success": None, "error": None},
+                }
+            if not render_report.get("success"):
                 raise HarnessFailure(RuntimeErrorCode.FORMATTING_FAILED, "document formatting failed")
             emit(RunStage.DOCUMENT_RENDERED, RunStatus.RUNNING, "document rendered")
 
@@ -254,6 +265,7 @@ class DocumentFormatHarness:
                 run_id=run_id,
                 output_bytes=output_bytes,
                 output_path=None,
+                render_report=render_report,
                 instruction_count=instruction_count,
                 warnings=warnings,
                 stage_history=stage_history,
@@ -289,6 +301,7 @@ class DocumentFormatHarness:
                 final_stage=RunStage.FAILED,
                 run_id=run_id,
                 instruction_count=instruction_count,
+                render_report=locals().get("render_report"),
                 warnings=warnings,
                 stage_history=stage_history,
                 error_code=exc.error_code,
@@ -329,6 +342,7 @@ class DocumentFormatHarness:
                 final_stage=RunStage.FAILED,
                 run_id=run_id,
                 instruction_count=instruction_count,
+                render_report=locals().get("render_report"),
                 warnings=warnings,
                 stage_history=stage_history,
                 error_code=RuntimeErrorCode.RUNTIME_INTERNAL_ERROR,

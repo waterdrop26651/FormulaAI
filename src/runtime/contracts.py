@@ -69,6 +69,7 @@ class DocumentFormatResult:
     run_id: str
     output_bytes: Optional[bytes] = None
     output_path: Optional[str] = None
+    render_report: Optional[dict] = None
     instruction_count: int = 0
     warnings: List[str] = field(default_factory=list)
     stage_history: List[StageRecord] = field(default_factory=list)

@@ -97,9 +97,25 @@ class DocProcessor:
         Returns:
             是否成功应用格式
         """
+        report = {
+            "success": False,
+            "total_elements": 0,
+            "processed_elements": 0,
+            "failed_elements": [],
+            "warnings": [],
+            "backup_path": None,
+            "output_file": None,
+            "header_footer": {
+                "attempted": bool(header_footer_config),
+                "success": None,
+                "error": None,
+            },
+        }
+
         if not self.document:
             app_logger.error("尚未加载文档，无法应用格式")
-            return False
+            report["warnings"].append("尚未加载文档，无法应用格式")
+            return report
         
         try:
             # 记录格式化指令，方便调试
@@ -108,12 +124,16 @@ class DocProcessor:
             # 检查formatting_instructions结构
             if not isinstance(formatting_instructions, dict):
                 app_logger.error(f"排版指令不是字典类型: {type(formatting_instructions)}")
-                return False
+                report["warnings"].append(f"排版指令不是字典类型: {type(formatting_instructions)}")
+                return report
             
             elements = formatting_instructions.get('elements', [])
             if not isinstance(elements, list):
                 app_logger.error(f"元素列表不是列表类型: {type(elements)}")
-                return False
+                report["warnings"].append(f"元素列表不是列表类型: {type(elements)}")
+                return report
+
+            report["total_elements"] = len(elements)
             
             app_logger.info(f"开始应用排版格式，共有 {len(elements)} 个元素")
             
@@ -123,6 +143,7 @@ class DocProcessor:
             
             # 备份原始文档
             backup_path = backup_file(self.input_file)
+            report["backup_path"] = backup_path
             app_logger.info(f"文件备份成功: {self.input_file} -> {backup_path}")
             
             # 创建新文档以应用格式
@@ -131,7 +152,8 @@ class DocProcessor:
                 app_logger.debug("成功创建新文档")
             except Exception as e:
                 app_logger.error(f"创建新文档失败: {str(e)}")
-                return False
+                report["warnings"].append(f"创建新文档失败: {str(e)}")
+                return report
             
             # 批处理元素，避免内存压力
             batch_size = 10  # 每批处理10个元素，进一步减少内存压力
@@ -146,9 +168,22 @@ class DocProcessor:
                     element = elements[i]
                     try:
                         app_logger.debug(f"处理第 {i+1}/{total_elements} 个元素")
-                        self._process_element(new_doc, element)
+                        processed = self._process_element(new_doc, element)
+                        if processed:
+                            report["processed_elements"] += 1
+                        else:
+                            report["failed_elements"].append({
+                                "index": i,
+                                "type": element.get("type", "正文") if isinstance(element, dict) else "unknown",
+                                "error": "element processing failed",
+                            })
                     except Exception as e:
                         app_logger.error(f"处理第 {i+1} 个元素时发生错误: {str(e)}")
+                        report["failed_elements"].append({
+                            "index": i,
+                            "type": element.get("type", "正文") if isinstance(element, dict) else "unknown",
+                            "error": str(e),
+                        })
                         # 继续处理下一个元素，不中断整个过程
 
                 app_logger.debug(f"批次 {batch_start+1}-{batch_end} 处理完成")
@@ -156,15 +191,18 @@ class DocProcessor:
             # 生成输出文件名
             try:
                 self.output_file = generate_output_filename(self.input_file, custom_save_path)
+                report["output_file"] = self.output_file
                 app_logger.debug(f"生成输出文件名: {self.output_file}")
             except Exception as e:
                 app_logger.error(f"生成输出文件名失败: {str(e)}")
+                report["warnings"].append(f"生成输出文件名失败: {str(e)}")
                 # 如果指定了自定义保存路径，则使用该路径
                 if custom_save_path and os.path.isdir(custom_save_path):
                     filename = os.path.basename(self.input_file).replace('.docx', '_已排版.docx')
                     self.output_file = os.path.join(custom_save_path, filename)
                 else:
                     self.output_file = self.input_file.replace('.docx', '_已排版.docx')
+                report["output_file"] = self.output_file
                 app_logger.debug(f"使用默认输出文件名: {self.output_file}")
             
             # 应用页眉页脚（在保存之前）
@@ -172,13 +210,19 @@ class DocProcessor:
                 try:
                     app_logger.info("开始应用页眉页脚设置")
                     success = self.header_footer_processor.apply_header_footer(new_doc, header_footer_config)
+                    report["header_footer"]["success"] = success
                     if success:
                         app_logger.info("页眉页脚应用成功")
                     else:
                         app_logger.warning("页眉页脚应用失败，但继续保存文档")
+                        report["header_footer"]["error"] = "页眉页脚应用失败，但继续保存文档"
                 except Exception as e:
                     app_logger.error(f"应用页眉页脚时发生错误: {str(e)}")
+                    report["header_footer"]["success"] = False
+                    report["header_footer"]["error"] = str(e)
                     # 不中断文档保存过程
+            else:
+                report["header_footer"]["success"] = None
             
             # 保存文档
             try:
@@ -190,15 +234,18 @@ class DocProcessor:
                 
                 new_doc.save(self.output_file)
                 app_logger.info(f"成功应用排版格式并保存到: {self.output_file}")
-                return True
+                report["success"] = not report["failed_elements"] and report["header_footer"]["success"] is not False
+                return report
             except Exception as e:
                 app_logger.error(f"保存文档失败: {str(e)}")
-                return False
+                report["warnings"].append(f"保存文档失败: {str(e)}")
+                return report
         except Exception as e:
             app_logger.error(f"应用排版格式失败: {str(e)}")
             import traceback
             app_logger.error(f"详细错误信息: {traceback.format_exc()}")
-            return False
+            report["warnings"].append(f"应用排版格式失败: {str(e)}")
+            return report
     
     def _process_element(self, doc, element):
         """
@@ -218,7 +265,7 @@ class DocProcessor:
             # 检查元素结构
             if not isinstance(element, dict):
                 app_logger.error(f"元素不是字典类型: {type(element)}")
-                return
+                return False
             
             content = element.get('content', '')
             app_logger.debug(f"元素内容: {content[:50]}...")
@@ -250,6 +297,7 @@ class DocProcessor:
             app_logger.debug("成功应用段落格式")
             
             app_logger.debug(f"完成元素处理: {element_type}, 内容: {content[:20]}...")
+            return True
 
         except Exception as e:
             app_logger.error(f"处理元素时发生异常: {str(e)}")
@@ -257,6 +305,7 @@ class DocProcessor:
             import traceback
             app_logger.error(f"异常详情: {traceback.format_exc()}")
             # 不抛出异常，继续处理下一个元素
+            return False
     
     def _apply_font(self, run, format_info):
         """
