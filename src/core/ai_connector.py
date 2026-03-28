@@ -14,6 +14,25 @@ except ImportError:
 
 from ..utils.logger import app_logger
 
+ALIGNMENT_ALIASES = {
+    "left": "left",
+    "center": "center",
+    "right": "right",
+    "justify": "justify",
+    "justified": "justify",
+    "leftalign": "left",
+    "centeralign": "center",
+    "rightalign": "right",
+    "左对齐": "left",
+    "左": "left",
+    "居中": "center",
+    "居中对齐": "center",
+    "右对齐": "right",
+    "右": "right",
+    "两端对齐": "justify",
+    "两端": "justify",
+}
+
 class AIConnector:
     """AI接口连接器，负责与AI API通信"""
     
@@ -355,6 +374,22 @@ class AIConnector:
         # 如果所有修复方法都失败，返回原始JSON
         app_logger.warning("无法修复JSON格式，返回原始字符串")
         return json_str
+
+    def _normalize_alignment(self, value):
+        """统一对齐值为 left/center/right/justify。"""
+        raw = str(value or "").strip()
+        key = raw.lower().replace(" ", "")
+
+        if key in ALIGNMENT_ALIASES:
+            return ALIGNMENT_ALIASES[key]
+
+        if "居中" in raw:
+            return "center"
+        if "右" in raw:
+            return "right"
+        if "两端" in raw:
+            return "justify"
+        return "left"
     
     def parse_response(self, response):
         """
@@ -454,6 +489,14 @@ class AIConnector:
                         if 'format' not in element:
                             app_logger.error(f"元素 {i} 缺少format字段")
                             return False, f"响应格式错误: 元素 {i} 缺少format字段"
+
+                        if not isinstance(element['format'], dict):
+                            app_logger.error(f"元素 {i} 的format不是字典类型: {type(element['format'])}")
+                            return False, f"响应格式错误: 元素 {i} 的format应为字典类型"
+
+                        # 统一对齐字段，避免中文/英文混用导致下游行为不一致
+                        format_info = element['format']
+                        format_info['alignment'] = self._normalize_alignment(format_info.get('alignment', 'left'))
                     
                     app_logger.debug(f"JSON解析成功，得到字典类型数据")
                     

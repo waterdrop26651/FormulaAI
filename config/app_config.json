@@ -5,5 +5,6 @@
         "width": 900,
         "height": 700
     },
-    "theme": "light"
+    "theme": "light",
+    "language": "zh"
 }

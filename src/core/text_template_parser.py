@@ -7,7 +7,6 @@
 import re
 import json
 from ..utils.logger import app_logger
-from .ai_connector import AIConnector
 
 class TextTemplateParser:
     """文本模板解析器，负责解析格式要求文本并生成模板"""
@@ -43,14 +42,19 @@ class TextTemplateParser:
         
         # 对齐方式映射
         self.alignment_mapping = {
-            "居中": "center",
-            "左对齐": "left", 
-            "右对齐": "right",
-            "两端对齐": "justify",
             "center": "center",
             "left": "left",
             "right": "right",
-            "justify": "justify"
+            "justify": "justify",
+            "justified": "justify",
+            "居中": "center",
+            "居中对齐": "center",
+            "左对齐": "left",
+            "左": "left",
+            "右对齐": "right",
+            "右": "right",
+            "两端对齐": "justify",
+            "两端": "justify",
         }
         
         app_logger.info("文本模板解析器初始化完成")
@@ -205,7 +209,19 @@ class TextTemplateParser:
             # 解析JSON
             try:
                 app_logger.debug(f"准备解析JSON: {json_str[:500]}...")
-                rules = json.loads(json_str)
+                parsed_json = json.loads(json_str)
+
+                # 兼容两种输出：
+                # 1) 直接返回 rules 对象
+                # 2) 返回 {name, description, rules}
+                if isinstance(parsed_json, dict) and isinstance(parsed_json.get("rules"), dict):
+                    rules = parsed_json["rules"]
+                else:
+                    rules = parsed_json
+
+                if not isinstance(rules, dict):
+                    return False, "解析结果不是有效的规则字典"
+
                 app_logger.info(f"成功解析AI响应，提取了 {len(rules)} 个规则")
                 
                 # 记录解析出的规则
@@ -228,7 +244,11 @@ class TextTemplateParser:
                 if fixed_json != json_str:
                     try:
                         app_logger.info("尝试使用修复后的JSON")
-                        rules = json.loads(fixed_json)
+                        parsed_json = json.loads(fixed_json)
+                        if isinstance(parsed_json, dict) and isinstance(parsed_json.get("rules"), dict):
+                            rules = parsed_json["rules"]
+                        else:
+                            rules = parsed_json
                         normalized_rules = self._normalize_rules(rules)
                         return True, normalized_rules
                     except json.JSONDecodeError:
@@ -368,9 +388,9 @@ class TextTemplateParser:
             normalized_rule = {
                 "font": rule.get("font", "宋体"),
                 "size": rule.get("size", "五号"),
-                "bold": bool(rule.get("bold", False)),
-                "line_spacing": float(rule.get("line_spacing", 1.5)),
-                "alignment": self.alignment_mapping.get(rule.get("alignment", "left"), "left")
+                "bold": self._to_bool(rule.get("bold", False)),
+                "line_spacing": self._to_float(rule.get("line_spacing", 1.5), 1.5),
+                "alignment": self._normalize_alignment(rule.get("alignment", "left")),
             }
             
             # 验证字号
@@ -382,3 +402,45 @@ class TextTemplateParser:
             app_logger.debug(f"标准化规则: {element_type} -> {normalized_rule}")
         
         return normalized
+
+    def _normalize_alignment(self, value):
+        """统一对齐值为 left/center/right/justify。"""
+        raw = str(value or "").strip()
+        key = raw.lower().replace(" ", "")
+
+        if key in self.alignment_mapping:
+            return self.alignment_mapping[key]
+
+        if "居中" in raw:
+            return "center"
+        if "右" in raw:
+            return "right"
+        if "两端" in raw:
+            return "justify"
+        return "left"
+
+    def _to_bool(self, value):
+        """将字符串/数字等输入安全转换为 bool。"""
+        if isinstance(value, bool):
+            return value
+        if isinstance(value, (int, float)):
+            return value != 0
+        if isinstance(value, str):
+            normalized = value.strip().lower()
+            if normalized in {"true", "1", "yes", "y", "是", "对"}:
+                return True
+            if normalized in {"false", "0", "no", "n", "否", "错"}:
+                return False
+        return bool(value)
+
+    def _to_float(self, value, default):
+        """将行距安全转换为 float；失败时使用默认值。"""
+        if isinstance(value, (int, float)):
+            return float(value)
+        if isinstance(value, str):
+            cleaned = value.strip().replace("倍", "")
+            try:
+                return float(cleaned)
+            except ValueError:
+                return default
+        return default
