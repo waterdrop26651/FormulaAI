@@ -7,6 +7,8 @@ from datetime import datetime, timezone
 from hashlib import sha256
 from pathlib import Path
 
+from docx import Document as WordDocument
+
 from src.core.ai_connector import AIConnector
 from src.core.doc_processor import DocProcessor
 from src.core.format_manager import FormatManager
@@ -214,6 +216,7 @@ class DocumentFormatHarness:
             if not output_path or not Path(output_path).exists():
                 raise HarnessFailure(RuntimeErrorCode.OUTPUT_NOT_FOUND, "output file not found")
             output_bytes = Path(output_path).read_bytes()
+            output_validation = self._validate_output_document(output_path, output_bytes)
             emit(RunStage.OUTPUT_READY, RunStatus.RUNNING, "output ready")
 
             self.run_store.write_manifest(
@@ -252,8 +255,14 @@ class DocumentFormatHarness:
                     "result": {
                         "element_count": instruction_count,
                         "output_persisted": False,
-                        "output_sha256": None,
+                        "output_sha256": "sha256:" + sha256(output_bytes).hexdigest(),
+                        "render_summary": {
+                            "processed_elements": render_report.get("processed_elements", 0),
+                            "failed_elements_count": len(render_report.get("failed_elements", [])),
+                            "warnings_count": len(render_report.get("warnings", [])),
+                        },
                     },
+                    "output_validation": output_validation,
                     "warnings": warnings,
                     "error": None,
                 },
@@ -364,3 +373,17 @@ class DocumentFormatHarness:
             if marker_index != -1:
                 text = text[:marker_index].strip(" ,;:")
         return text or error_code.value.lower()
+
+    def _validate_output_document(self, output_path, output_bytes):
+        validation = {
+            "document_loadable": False,
+            "paragraph_count": 0,
+            "output_size_bytes": len(output_bytes),
+        }
+        try:
+            document = WordDocument(output_path)
+            validation["document_loadable"] = True
+            validation["paragraph_count"] = len(document.paragraphs)
+        except Exception:
+            validation["document_loadable"] = False
+        return validation

@@ -84,7 +84,10 @@ class ReportingDocProcessor:
 
     def apply_formatting(self, formatting_instructions, custom_save_path=None, header_footer_config=None):
         output_path = Path(custom_save_path) / "output.docx"
-        output_path.write_bytes(b"docx-bytes")
+        document = Document()
+        for element in formatting_instructions["elements"]:
+            document.add_paragraph(element["content"])
+        document.save(output_path)
         self.output_file = str(output_path)
         return {
             "success": True,
@@ -153,6 +156,10 @@ def test_document_format_harness_happy_path(tmp_path):
     manifest = json.loads(manifests[0].read_text(encoding="utf-8"))
     assert manifest["status"] == "success"
     assert manifest["result"]["element_count"] == 2
+    assert manifest["result"]["output_sha256"].startswith("sha256:")
+    assert manifest["result"]["render_summary"]["processed_elements"] == 2
+    assert manifest["output_validation"]["document_loadable"] is True
+    assert manifest["output_validation"]["paragraph_count"] == 2
 
 
 def test_document_format_harness_invalid_api_config_returns_failed_result(tmp_path):
