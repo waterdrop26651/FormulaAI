@@ -33,7 +33,7 @@ FormulaAI 是一款基于 AI 技术的智能文档排版工具。它能够自动
 
 ##  工程化实践 (Harness Engineering)
 
-本项目不仅是一个 AI 应用，更是一个具备完整 **Harness Engineering（工程化外骨骼）** 的 AI 系统，确保了 AI 排版流程的可控、可测与可回归：
+本项目不仅是一个 AI 应用，更是尝试探索 **Harness Engineering** 的 AI 系统，确保了 AI 排版流程的可控、可测与可回归：
 
 - **Runtime Harness (运行时契约)**：将复杂的文档排版链路收敛至 `DocumentFormatHarness`，建立结构化的输入/输出契约、阶段记录与错误分类。
 - **Offline Eval Harness (离线评测)**：提供 `formulaai-eval` CLI 工具，支持通过冻结的测试用例进行离线回放。不仅检查 AI 响应计划，还验证最终渲染文档的文本和排版对齐效果，并输出机器可读的 `summary.json` 和 `results.jsonl`。
@@ -44,7 +44,7 @@ FormulaAI 是一款基于 AI 技术的智能文档排版工具。它能够自动
 ### 1. 环境要求
 - **操作系统**：Windows / macOS / Linux
 - **Python 版本**：>= 3.8
-- **浏览器**：Chrome / Firefox / Safari / Edge 等现代浏览器
+- **浏览器**：Chrome / Firefox / Safari / Edge 等
 
 ### 2. 安装与配置
 
