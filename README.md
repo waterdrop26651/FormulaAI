@@ -4,308 +4,144 @@
 [![Streamlit](https://img.shields.io/badge/Streamlit-1.28+-red.svg)](https://streamlit.io/)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-## 项目简介
+FormulaAI 是一款基于 AI 技术的智能文档排版工具。它能够自动分析未排版的 Word 文档结构，并根据用户配置的排版规则（如学术论文、研究报告、技术文档规范）进行专业级的自动化排版，极大提升长文档格式化的效率与规范性。
 
-FormulaAI 是一款基于 AI 技术的智能文档排版工具，提供 Web 界面，能够自动分析未排版的 Word 文档结构，并根据用户配置的排版规则进行专业排版。本工具特别适合学术论文、研究报告、技术文档等需要规范格式的文档处理。
+## 📑 目录
+- [ 核心特性](#-核心特性)
+- [ 工程化实践 (Harness Engineering)](#-工程化实践-harness-engineering)
+- [ 快速开始](#-快速开始)
+- [ 使用指南](#-使用指南)
+- [ 项目结构](#-项目结构)
+- [ 常见问题](#-常见问题)
+- [ 参与贡献](#-参与贡献)
+- [ 许可证](#-许可证)
+- [ 致谢](#-致谢)
 
-**项目致谢**：本项目沿用 `https://github.com/chenningling/AIPoliDoc` 的项目结构和部分代码。
+##  核心特性
 
-## 简历 / 面试版项目表述
+- ** 文档结构智能分析**：利用大语言模型 (LLM) 分析未排版文档的结构，自动识别标题、摘要、关键词、正文等内容。
+- ** 灵活的排版规则管理**：
+  - 内置多种预设模板（学术论文格式、研究报告等）。
+  - 支持通过 Web 界面创建、编辑、删除模板。
+  - **AI 智能生成模板**：支持通过自然语言描述直接生成对应的排版规则配置。
+- ** 细粒度格式控制**：支持页眉页脚的定制化配置（字体、字号、对齐方式），并已深度整合到核心渲染链路中。
+- ** 现代化 Web 交互**：
+  - 基于 Streamlit 打造的响应式 Web 界面。
+  - 支持中英文双语界面切换，并持久化保存用户偏好设置。
+- ** 多模型 API 支持**：原生支持 DeepSeek、OpenAI 等兼容 API，配置灵活且持久化。
+- ** 跨平台与易部署**：默认不依赖复杂 GUI 库（如 PyQt6），支持在本地终端、CI 和 Headless 环境下稳定运行。
 
-### 项目介绍
+##  工程化实践 (Harness Engineering)
 
-FormulaAI 是一款面向学术论文、研究报告等场景的 AI 智能文档排版工具，能够自动识别未排版 Word 文档的结构，并按模板规则完成格式化输出。项目重点围绕 AI 文档理解、模板规则管理、页眉页脚配置、多语言 Web 交互与文档渲染链路展开，目标是把复杂、重复的 Word 排版工作产品化为可直接使用的智能工具。
+本项目不仅是一个 AI 应用，更是一个具备完整 **Harness Engineering（工程化外骨骼）** 的 AI 系统，确保了 AI 排版流程的可控、可测与可回归：
 
-### 技术栈
+- **Runtime Harness (运行时契约)**：将复杂的文档排版链路收敛至 `DocumentFormatHarness`，建立结构化的输入/输出契约、阶段记录与错误分类。
+- **Offline Eval Harness (离线评测)**：提供 `formulaai-eval` CLI 工具，支持通过冻结的测试用例进行离线回放。不仅检查 AI 响应计划，还验证最终渲染文档的文本和排版对齐效果，并输出机器可读的 `summary.json` 和 `results.jsonl`。
+- **CI Gate (持续集成门禁)**：全面接入 GitHub Actions，自动执行 `pytest` 与离线评测，将 eval 结果作为 CI 工件上传，生成可追溯的回归测试记录，保障每一次迭代的质量。
 
-Python、Streamlit、python-docx、pytest、GitHub Actions
+##  快速开始
 
-### 个人贡献
+### 1. 环境要求
+- **操作系统**：Windows / macOS / Linux
+- **Python 版本**：>= 3.8
+- **浏览器**：Chrome / Firefox / Safari / Edge 等现代浏览器
 
-- 负责推动 FormulaAI 从原型功能走向可用产品，重点完善文档排版主链路、模板解析、页眉页脚处理、多语言界面与下载交互，提升整体可用性和产品完成度。
-- 负责梳理 AI 排版流程中的关键体验问题，包括结果稳定性、模板规则一致性、输出质量和回归验证方式，并将这些问题沉淀为更工程化的产品改进方向。
-- 结合对 AI 产品发展趋势的关注，尝试把 Harness Engineering 的思路引入 FormulaAI，通过 runtime/eval/CI 的方式探索 AI 功能的可验证、可回归和可持续迭代能力，以向面试官体现我对 AI 产品方法论和技术前沿的持续关注。
-
-## 什么是 Harness Engineering
-
-Harness Engineering 不是单纯“把模型接进产品”，而是给 AI 系统补上一层可控、可测、可复放、可在 CI 中稳定运行的工程化外骨骼。  
-它关注的重点不是 prompt 写得多花，而是：
-
-- 把原本一次性的 AI 调用链路收敛成显式运行时入口
-- 为输入、阶段、输出、失败原因建立结构化契约
-- 让同一条链路可以被离线回放、评测和回归测试
-- 让结果产生可追踪工件，而不是只停留在页面上的“看起来成功”
-- 把这些能力接进 CI，变成真正的质量门禁
-
-对 FormulaAI 这种“AI 识别文档结构 -> 生成排版指令 -> 渲染 Word 输出”的产品来说，Harness Engineering 的价值很直接：它把文档排版从“依赖人工点点看效果”升级成“可以稳定验证、持续迭代、可回归检查”的 AI 产品系统。
-
-## 本次 Harness Engineering 更新
-
-这次更新的核心，不是再加一个页面或一个按钮，而是把 FormulaAI 从“有 AI 功能的应用”进一步改造成“带 runtime/eval/CI harness 的 AI 系统”。
-
-具体包括：
-
-- **Phase 1: Runtime Harness**
-  - 把文档排版主链路收敛到 `DocumentFormatHarness`
-  - 引入请求/结果契约、阶段记录、错误分类、运行清单和事件日志
-  - Web 页面不再直接拼装核心流程，而是走统一 runtime 入口
-
-- **Phase 2: Offline Eval Harness**
-  - 新增 `formulaai-eval` CLI 和离线 replay case
-  - 使用冻结样例回放 AI 响应，不依赖外部 API
-  - 不只检查 AI 返回的计划，还验证最终渲染出来的文档文本和 alignment
-  - 输出 `summary.json` 和 `results.jsonl`，让评测结果可机器消费
-
-- **CI Gate**
-  - GitHub Actions 自动运行 `pytest + formulaai-eval`
-  - 把 eval 结果作为 CI 工件上传，形成可回看的回归记录
-
-一句话概括：这次更新让 FormulaAI 不再只是“能跑的 AI 排版工具”，而是具备了 runtime harness、offline eval harness 和 CI gate 的工程化 AI 产品。
-
-## 主要功能
-
-- **文档结构智能分析**：利用 AI 能力分析未排版文档的结构，自动识别标题、摘要、关键词、正文等内容
-- **Web 图形界面**：
-  - 基于 Streamlit 的现代化 Web 界面
-  - 支持多页面导航（文档排版、模板管理、API 配置、从文本解析、帮助）
-  - 响应式设计，支持不同屏幕尺寸
-  - 支持中英文界面切换，并持久化保存语言设置
-- **排版规则管理**：
-  - 支持预设模板和自定义排版规则
-  - 提供多个预设模板（论文格式、研究报告等）
-  - Web 界面直接创建、编辑、删除模板
-  - AI 智能解析：从自然语言描述生成模板
-- **页眉页脚配置**：
-  - 支持页眉页脚内容设置
-  - 可配置字体、字号、对齐方式
-  - Web 排版流程已接入核心页眉页脚处理器
-- **多种 AI API 支持**：
-  - 支持 DeepSeek、OpenAI 等兼容 API
-  - 配置持久化保存
-- **运行环境兼容**：
-  - 默认不依赖 PyQt6，CLI、CI 和 headless 环境可直接运行
-  - 如需 Qt 字体探测，可额外安装 GUI 依赖
-- **详细日志**：提供详细的处理日志和进度显示
-- **自动化测试**：
-  - 覆盖核心解析、模板标准化、页眉页脚、配置管理与 AI 响应解析
-  - 不依赖旧版 Qt UI，也不依赖外部 API
-
-## 系统要求
-
-- **操作系统**：跨平台（Windows、macOS、Linux）
-- **Python 环境**：Python 3.8 或更高版本
-- **浏览器**：现代浏览器（Chrome、Firefox、Safari、Edge）
-
-## 项目结构
-
-```
-FormulaAI/
-├── config/                # 配置文件目录
-│   ├── api_config.json   # AI API配置
-│   ├── app_config.json   # 应用配置
-│   └── templates/        # 排版模板目录
-├── src/                  # 源代码目录
-│   ├── core/            # 核心功能模块
-│   │   ├── ai_connector.py     # AI服务连接器
-│   │   ├── doc_processor.py    # 文档处理器
-│   │   ├── format_manager.py   # 格式管理器
-│   │   ├── structure_analyzer.py# 结构分析器
-│   │   ├── header_footer_config.py # 页眉页脚配置
-│   │   └── header_footer_processor.py # 页眉页脚处理器
-│   ├── runtime/         # 运行时编排层
-│   │   ├── contracts.py # 运行时请求/结果/阶段契约
-│   │   ├── document_format_harness.py # 文档排版运行时 harness
-│   │   ├── eval_harness.py # 离线评测 harness 与 CLI
-│   │   ├── events.py    # 运行时事件适配
-│   │   ├── run_store.py # 运行元数据持久化
-│   │   └── template_rules.py # 共享规则标准化
-│   └── utils/           # 工具类模块
-│       ├── config_manager.py  # 配置管理器
-│       ├── font_manager.py    # 字体管理器
-│       ├── file_utils.py      # 文件工具
-│       └── logger.py          # 日志系统
-├── evals/               # 离线评测样例
-├── tests/               # 测试文件
-├── web_app.py           # Web应用入口
-└── pyproject.toml       # 项目配置
-```
-
-## 安装方法
-
-1. 克隆项目代码：
-   ```bash
-   git clone https://github.com/waterdrop26651/FormulaAI.git
-   cd FormulaAI
-   ```
-
-2. 安装基础依赖：
-   ```bash
-   pip install -e .
-   ```
-
-   或手动安装：
-   ```bash
-   pip install python-docx requests pillow chardet json5 streamlit
-   ```
-
-3. 可选：安装 GUI 字体探测依赖：
-   ```bash
-   pip install -e .[gui]
-   ```
-
-说明：
-- `PyQt6` 现在是可选依赖，不再是 Web 版本必装项
-- 默认字体发现会优先使用系统命令，适合本地终端、CI 和 headless 环境
-
-## 使用说明
-
-### 启动应用
+### 2. 安装与配置
 
 ```bash
-python -m streamlit run web_app.py
-```
+# 克隆项目代码
+git clone https://github.com/waterdrop26651/FormulaAI.git
+cd FormulaAI
 
-或：
+# 安装基础依赖
+pip install -e .
+
+# （可选）如果需要 Qt 字体探测功能，可安装完整 GUI 依赖
+pip install -e .[gui]
+```
+> **注**：默认使用系统命令进行字体探测，非常适合本地终端、CI 和服务器 (Headless) 环境。
+
+## 📖 使用指南
+
+### 启动 Web 界面
 
 ```bash
 streamlit run web_app.py
 ```
+启动后，浏览器会自动打开 `http://localhost:8501`。
 
-启动后默认在浏览器访问 `http://localhost:8501`
+### 核心工作流
 
-### 运行离线评测
+1. **配置 AI 模型**（首次使用）：
+   - 进入左侧导航栏的「API 配置」。
+   - 填入兼容的 API URL（如 `https://api.deepseek.com` 或 `https://api.openai.com`）和对应的 API Key。
+   - 选择模型后，点击保存并测试连接。
+2. **执行文档排版**：
+   - 切换到「文档排版」页面，上传待处理的 `.docx` 文档。
+   - 选择目标排版模板，并按需配置页眉页脚。
+   - 点击「开始排版」，处理完成后即可下载标准化排版后的文档。
+3. **自然语言生成模板**：
+   - 在「从文本解析」页面，输入如“一级标题黑体三号居中，正文宋体小四，首行缩进两字符”等描述。
+   - AI 将自动为您生成结构化的排版模板，可直接保存使用。
 
-安装项目后可直接运行：
+### 运行离线评测 (Eval)
+
+开发者可直接运行内置的评测套件，用于回归测试：
 
 ```bash
+# 使用 CLI 运行
 formulaai-eval --cases-dir evals/cases
-```
 
-或使用模块方式：
-
-```bash
+# 或通过 Python 模块运行
 python3 -m src.runtime.eval_harness --cases-dir evals/cases
 ```
 
-评测特性：
+##  项目结构
 
-- 不访问外部 API，适合本地回归和 CI
-- 复用现有 runtime 文档排版链路
-- 默认把 suite 结果写到 `runtime/evals/<suite_id>/summary.json`
-- 同时写出逐条 case 结果 `runtime/evals/<suite_id>/results.jsonl`
-- 任一 case 断言不满足时返回非零退出码
-
-CI 现在会自动执行：
-
-- `python3 -m pytest -q`
-- `formulaai-eval --cases-dir evals/cases`
-
-并把 eval 结果工件上传，方便回看 `summary.json` 和 `results.jsonl`
-
-### 使用流程
-
-1. **配置 API**（首次使用）
-   - 在侧边栏点击「API配置 / API Settings」
-   - 填写 API URL（如 `https://api.deepseek.com`）
-   - 填写 API Key
-   - 选择模型
-   - 点击「保存配置」
-   - 可用「测试连接」验证配置
-
-2. **排版文档**
-   - 点击「文档排版」
-   - 上传 Word 文档（`.docx` 格式）
-   - 选择排版模板
-   - （可选）配置页眉页脚
-   - 点击「开始排版」
-   - 下载排版后的文档
-
-3. **管理模板**
-   - 点击「模板管理」
-   - 查看现有模板规则
-   - 创建新模板或编辑现有模板
-   - 删除不需要的模板
-
-4. **AI 解析模板**
-   - 点击「从文本解析」
-   - 输入模板名称
-   - 用自然语言描述格式要求
-   - AI 自动生成排版模板
-
-5. **切换界面语言**
-   - 在左侧边栏使用 `Language / 语言` 切换
-   - 当前支持 `中文` 和 `English`
-   - 语言设置会写入应用配置并在下次启动时恢复
-
-### API 配置示例
-
-支持的 API 服务：
-
-| 服务商 | Base URL |
-|--------|----------|
-| DeepSeek | `https://api.deepseek.com` |
-| OpenAI | `https://api.openai.com` |
-| 其他 | 输入兼容 API 的 Base URL |
-
-## 常见问题
-
-1. **API 配置问题**
-   - 确保 API 密钥正确
-   - 检查网络连接
-   - 确认账户余额充足
-
-2. **排版效果问题**
-   - 检查文档结构是否规范
-   - 尝试调整模板参数
-   - 查看日志了解 AI 识别结果
-
-3. **字体问题**
-   - 请确保打开文档的电脑安装了相应字体
-   - 默认不依赖 PyQt6 也可以完成字体发现与文档生成
-   - 如需 Qt 字体探测，可安装 `.[gui]`
-
-## 技术栈
-
-- **后端框架**：Python 3.8+
-- **Web 框架**：Streamlit
-- **文档处理**：python-docx
-- **AI 接口**：支持 OpenAI 兼容 API
-- **测试框架**：pytest
-
-## 测试
-
-运行测试：
-
-```bash
-python -m pytest -q
+```text
+FormulaAI/
+├── config/                # 配置文件目录 (API配置、应用配置、预设模板)
+├── src/                   # 源代码目录
+│   ├── core/              # 核心功能模块 (AI连接、文档处理、格式管理)
+│   ├── runtime/           # 运行时编排层 (Harness、契约、评测、事件流)
+│   └── utils/             # 通用工具类 (配置、字体、日志等)
+├── evals/                 # 离线评测用例 (Cases)
+├── tests/                 # 单元测试与集成测试
+├── web_app.py             # Streamlit Web 应用入口
+└── pyproject.toml         # 项目依赖与构建配置
 ```
 
-当前测试覆盖：
-- 文档结构分析器
-- 模板文本解析与规则标准化
-- 运行时 harness、运行记录与 Web 编排入口
-- 离线 eval harness、case 回放与 CLI 退出码
-- `ConfigManager` / `FormatManager`
-- `HeaderFooterConfig` / `HeaderFooterProcessor`
-- `AIConnector` 的无网络解析逻辑
+##  常见问题
 
-## 当前状态
+**Q: API 连接失败或超时怎么办？**
+- 请检查网络环境，确认 API Key 填写无误且账户有充足余额。部分服务商可能需要配置网络代理。
 
-- FormulaAI 已形成 `runtime harness + offline eval harness + CI gate` 的基本 Harness Engineering 结构
-- Web 页面现在通过 `src/runtime/document_format_harness.py` 调用核心排版链路
-- Runtime Harness 已提供显式请求/结果契约、阶段记录、脱敏运行元数据与输出校验
-- Offline Eval Harness 可对冻结 case 做回放评测，并输出 `summary.json + results.jsonl`
-- GitHub Actions 已接入 `pytest + formulaai-eval`，可把 harness 结果作为 CI gate
-- 运行记录默认只保留 `manifest.json` / `events.jsonl` 这类脱敏元数据，不默认持久化原始文档、prompt、response
-- Web 排版流程已接入核心 `DocProcessor`
-- 页眉页脚配置已接入实际文档输出链路
-- 模板和 AI 响应中的 `alignment` 会统一标准化为 `left / center / right / justify`
-- 旧版 Qt UI 测试已移除，测试体系已切换到当前 Web/核心逻辑
+**Q: 排版后发现字体未生效？**
+- 排版生成的 Word 文档依赖于打开它的电脑上是否安装了对应字体。请确保目标设备已安装所需的字体（如“黑体”、“宋体”等）。
 
-## 贡献指南
+**Q: AI 识别文档结构不准确？**
+- 确保原始文档有基本的段落区分。您也可以通过调整 API 的 Temperature 参数或更换推理能力更强的模型（如 DeepSeek V3/R1 或 GPT-4o）来改善结构识别效果。
 
-欢迎提交 Issue 和 Pull Request 来帮助改进项目。
+##  参与贡献
 
-## 许可证
+欢迎通过 Issue 或 Pull Request 参与项目建设！
 
-本项目采用 MIT 许可证，详见 LICENSE 文件。
+1. Fork 本仓库
+2. 创建您的特性分支 (`git checkout -b feature/AmazingFeature`)
+3. 提交您的修改 (`git commit -m 'feat: add some AmazingFeature'`)
+4. 推送到分支 (`git push origin feature/AmazingFeature`)
+5. 发起 Pull Request
+
+在提交 PR 前，请确保通过了所有的单元测试与评测用例：
+```bash
+python -m pytest -q
+formulaai-eval --cases-dir evals/cases
+```
+
+## 📄 许可证
+
+本项目基于 [MIT 许可证](LICENSE) 开源。
+
+##  致谢
+
+本项目在开发过程中，部分结构与代码参考了 [AIPoliDoc](https://github.com/chenningling/AIPoliDoc)，特此致谢！
